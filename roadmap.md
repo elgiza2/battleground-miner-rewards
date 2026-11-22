@@ -1,0 +1,17 @@
+# DROPZONE roadmap
+
+- [ ] Design system: follow user-pasted "Intelligent Performance" look (paper #ececeb, Inter, gradient glass cards 429x554, LED dot numbers, grain, CloudFront bg videos) + generated art
+- [ ] Database (bg_* tables only; this backend is shared with other apps — never touch non-bg tables)
+- [ ] Telegram identity (initData verification) + full-screen mini app setup
+- [ ] Mining game home (match/drop, airdrop crates via ads, ad boosts)
+- [ ] 90 servers page (1 free via 300 ads, 1 free via 50 referrals, rest paid in GRAM/TON)
+- [ ] Missions page (many ad + referral tasks, daily ad ladder up to 1000)
+- [ ] Squad / referrals (multi-level commissions, milestones)
+- [ ] Operators (characters with boosts)
+- [ ] Withdraw page (min 1, fee 0.05, join community, 1 referral OR 25 ads)
+- [ ] TON Connect payments to treasury + verification + admin payment alerts
+- [ ] Admin /101 (owners @eigiza @torker: stats, payments, withdrawals, tasks, task-managers who only see tasks)
+- [ ] Bot: bold /start with colored buttons, gift messages with claim button
+- [ ] Daily notifications (several per day to all users) + daily gifts
+- [ ] Auto news posts 2–3/day (AI image + text + open-app button)
+- [ ] BLOCKED: bot token (user will send), community channel username (user will send)
