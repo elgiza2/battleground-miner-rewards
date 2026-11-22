@@ -18,6 +18,7 @@ import { initTelegram } from "@/lib/telegram-client";
 import { loadAdSdk } from "@/lib/ads";
 import { Dock } from "@/components/game/Dock";
 import { FilterDefs } from "@/components/game/GlassCard";
+import { Check, Circle, Loader2, Zap } from "@/components/game/GlassIcons";
 
 function NotFoundComponent() {
   return (
@@ -139,7 +140,7 @@ function RootComponent() {
         <Outlet />
         {!isAdmin && <Dock />}
       </main>
-      <Toaster position="bottom-center" offset={104} mobileOffset={{ bottom: 104 }} toastOptions={{ className: "glass toast-glass" }} />
+      <Toaster position="bottom-center" offset={112} mobileOffset={{ bottom: 112 }} icons={{ success: <Check className="h-6 w-6" />, error: <Circle className="h-6 w-6" />, info: <Circle className="h-6 w-6" />, warning: <Zap className="h-6 w-6" />, loading: <Loader2 className="h-6 w-6 animate-spin" /> }} toastOptions={{ className: "glass toast-glass" }} />
     </QueryClientProvider>
   );
 }
