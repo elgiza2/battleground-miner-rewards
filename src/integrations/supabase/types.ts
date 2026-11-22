@@ -185,6 +185,44 @@ export type Database = {
         }
         Relationships: []
       }
+      bg_contest_payouts: {
+        Row: {
+          created_at: string
+          currency: string
+          day: string
+          invites: number
+          prize: number
+          rank: number
+          telegram_id: number
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          day: string
+          invites: number
+          prize: number
+          rank: number
+          telegram_id: number
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          day?: string
+          invites?: number
+          prize?: number
+          rank?: number
+          telegram_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bg_contest_payouts_telegram_id_fkey"
+            columns: ["telegram_id"]
+            isOneToOne: false
+            referencedRelation: "bg_players"
+            referencedColumns: ["telegram_id"]
+          },
+        ]
+      }
       bg_gift_claims: {
         Row: {
           claimed_at: string
@@ -452,6 +490,7 @@ export type Database = {
       }
       bg_players: {
         Row: {
+          activated: boolean
           ad_last_at: string | null
           ads_day: string | null
           ads_today: number
@@ -486,6 +525,7 @@ export type Database = {
           wallet_address: string | null
         }
         Insert: {
+          activated?: boolean
           ad_last_at?: string | null
           ads_day?: string | null
           ads_today?: number
@@ -520,6 +560,7 @@ export type Database = {
           wallet_address?: string | null
         }
         Update: {
+          activated?: boolean
           ad_last_at?: string | null
           ads_day?: string | null
           ads_today?: number
@@ -2822,6 +2863,16 @@ export type Database = {
         Args: { _amount: number; _meta?: Json; _reason: string; _tid: number }
         Returns: number
       }
+      bg_daily_ranks: {
+        Args: { _day: string; _limit?: number }
+        Returns: {
+          first_name: string
+          invites: number
+          rank: number
+          telegram_id: number
+          username: string
+        }[]
+      }
       bg_pending: {
         Args: { _cap_hours?: number; _tid: number }
         Returns: number
@@ -2836,6 +2887,7 @@ export type Database = {
         }
         Returns: Json
       }
+      bg_settle_daily_contest: { Args: { _day: string }; Returns: number }
       bg_swap: {
         Args: { _gram: number; _pubg: number; _tid: number }
         Returns: Json
