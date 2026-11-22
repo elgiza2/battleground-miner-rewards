@@ -2800,6 +2800,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bg_admin_stats: { Args: never; Returns: Json }
       bg_claim: { Args: { _bonus?: number; _tid: number }; Returns: number }
       bg_credit: {
         Args: { _amount: number; _meta?: Json; _reason: string; _tid: number }
@@ -2818,6 +2819,15 @@ export type Database = {
           _tid: number
         }
         Returns: Json
+      }
+      bg_top_inviters: {
+        Args: { _limit?: number; _since: string }
+        Returns: {
+          first_name: string
+          invites: number
+          telegram_id: number
+          username: string
+        }[]
       }
       consume_ai_action: { Args: { p_kind?: string }; Returns: Json }
       provision_user: {
