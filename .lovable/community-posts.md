@@ -4,7 +4,7 @@ Channel: @puilos
 Button on every post: **PLAY PUBG** → https://t.me/Dropeybot?startapp
 Formatting: entire caption bold; no emoji. Only post 1 authorized for publication. Posts 2–5 remain drafts.
 Requested post 1 time: 2026-11-22 12:40 UTC (14:40 UTC+2).
-Delivery blocker: bot cannot access channel member list; channel posting permission is not confirmed. No external scheduler is configured. Nothing is scheduled or sent.
+Post 1 published on 2026-11-22 at 12:52:30 UTC in @puilos, message 79: https://t.me/puilos/79. Telegram confirmed the photo, full bold caption, and PLAY PUBG link. Posts 2–5 remain unscheduled drafts.
 
 ## 1. Welcome to PUBG
 Image: src/assets/art/start-banner.jpg.asset.json
