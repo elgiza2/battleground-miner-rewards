@@ -25,3 +25,4 @@
 - [ ] Better bottom navigation with clean transition animation between pages
 - [ ] Move notifications (toasts) off the top and position them properly
 - [ ] Daily referral contest; prize split among top 10 inviters
+- [ ] Activation: pay 0.1 GRAM to start mining and to get the free server
