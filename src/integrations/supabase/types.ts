@@ -263,6 +263,7 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          currency: string
           id: number
           meta: Json | null
           reason: string
@@ -271,6 +272,7 @@ export type Database = {
         Insert: {
           amount: number
           created_at?: string
+          currency?: string
           id?: number
           meta?: Json | null
           reason: string
@@ -279,6 +281,7 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          currency?: string
           id?: number
           meta?: Json | null
           reason?: string
@@ -458,6 +461,7 @@ export type Database = {
           bot_blocked: boolean
           created_at: string
           first_name: string | null
+          gram_balance: number
           is_premium: boolean
           joined_channel: boolean
           language_code: string | null
@@ -476,6 +480,7 @@ export type Database = {
           total_mined: number
           total_ref_earned: number
           total_spent: number
+          total_swapped: number
           updated_at: string
           username: string | null
           wallet_address: string | null
@@ -490,6 +495,7 @@ export type Database = {
           bot_blocked?: boolean
           created_at?: string
           first_name?: string | null
+          gram_balance?: number
           is_premium?: boolean
           joined_channel?: boolean
           language_code?: string | null
@@ -508,6 +514,7 @@ export type Database = {
           total_mined?: number
           total_ref_earned?: number
           total_spent?: number
+          total_swapped?: number
           updated_at?: string
           username?: string | null
           wallet_address?: string | null
@@ -522,6 +529,7 @@ export type Database = {
           bot_blocked?: boolean
           created_at?: string
           first_name?: string | null
+          gram_balance?: number
           is_premium?: boolean
           joined_channel?: boolean
           language_code?: string | null
@@ -540,6 +548,7 @@ export type Database = {
           total_mined?: number
           total_ref_earned?: number
           total_spent?: number
+          total_swapped?: number
           updated_at?: string
           username?: string | null
           wallet_address?: string | null
@@ -722,6 +731,7 @@ export type Database = {
           admin_note: string | null
           amount: number
           created_at: string
+          currency: string
           fee_payment_id: string | null
           id: string
           processed_at: string | null
@@ -734,6 +744,7 @@ export type Database = {
           admin_note?: string | null
           amount: number
           created_at?: string
+          currency?: string
           fee_payment_id?: string | null
           id?: string
           processed_at?: string | null
@@ -746,6 +757,7 @@ export type Database = {
           admin_note?: string | null
           amount?: number
           created_at?: string
+          currency?: string
           fee_payment_id?: string | null
           id?: string
           processed_at?: string | null
@@ -2806,6 +2818,10 @@ export type Database = {
         Args: { _amount: number; _meta?: Json; _reason: string; _tid: number }
         Returns: number
       }
+      bg_credit_gram: {
+        Args: { _amount: number; _meta?: Json; _reason: string; _tid: number }
+        Returns: number
+      }
       bg_pending: {
         Args: { _cap_hours?: number; _tid: number }
         Returns: number
@@ -2818,6 +2834,10 @@ export type Database = {
           _reward: number
           _tid: number
         }
+        Returns: Json
+      }
+      bg_swap: {
+        Args: { _gram: number; _pubg: number; _tid: number }
         Returns: Json
       }
       bg_top_inviters: {

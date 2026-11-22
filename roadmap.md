@@ -19,3 +19,9 @@
 - [ ] Ads via Monetag SDK (libtl.com, zone 12323205, show_12323205) instead of Adsgram
 - [ ] Show live PUBG price; swap PUBG → GRAM inside the app
 - [ ] GRAM withdrawals with minimum 0.5 GRAM (PUBG withdrawals stay too)
+- [ ] Rename app to PUBG (same as the coin) everywhere: UI, titles, bot texts, manifest
+- [ ] Redraw every image and icon (servers, operators, crate, logo, nav icons) in the exact glass-card site style
+- [ ] Free base mining for everyone without a server (small rate)
+- [ ] Better bottom navigation with clean transition animation between pages
+- [ ] Move notifications (toasts) off the top and position them properly
+- [ ] Daily referral contest; prize split among top 10 inviters

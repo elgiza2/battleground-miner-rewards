@@ -20,7 +20,7 @@ export async function adminOverview(initData: string) {
   const [stats, pays, wds, cfg, admins, jobs, posts] = await Promise.all([
     db.rpc("bg_admin_stats"),
     db.from("bg_payments").select("id, telegram_id, amount_nano, purpose, ref, status, created_at, confirmed_at, bg_players(first_name, username)").eq("status", "confirmed").order("confirmed_at", { ascending: false }).limit(25),
-    db.from("bg_withdrawals").select("id, telegram_id, amount, wallet, status, created_at, bg_players(first_name, username, ref_count, ads_total)").in("status", ["pending"]).order("created_at").limit(50),
+    db.from("bg_withdrawals").select("id, telegram_id, amount, wallet, status, currency, created_at, bg_players(first_name, username, ref_count, ads_total)").in("status", ["pending"]).order("created_at").limit(50),
     getConfig(),
     db.from("bg_admins").select("username, role, telegram_id, created_at").order("created_at"),
     db.from("bg_jobs").select("key, sent, done, updated_at").order("updated_at", { ascending: false }).limit(8),
@@ -112,16 +112,16 @@ export async function adminProcessWithdrawal(initData: string, id: string, appro
     .update({ status: approve ? "paid" : "rejected", admin_note: note, processed_at: new Date().toISOString(), processed_by: user.id })
     .eq("id", id)
     .eq("status", "pending")
-    .select("telegram_id, amount")
+    .select("telegram_id, amount, currency")
     .maybeSingle();
   if (!w) throw new GameError("Already processed");
-  if (!approve) await db.rpc("bg_credit", { _tid: w.telegram_id, _amount: Number(w.amount), _reason: "withdraw_refund" });
+  if (!approve) await db.rpc(w.currency === "GRAM" ? "bg_credit_gram" : "bg_credit", { _tid: w.telegram_id, _amount: Number(w.amount), _reason: "withdraw_refund" });
   void tg("sendMessage", {
     chat_id: w.telegram_id,
     parse_mode: "HTML",
     text: approve
-      ? `<b>✅ Withdrawal sent!</b>\n\n<b>${Number(w.amount)} GRAM</b> is on its way to your wallet.${note ? `\nTx: <code>${esc(note)}</code>` : ""}`
-      : `<b>Withdrawal returned</b>\n\n<b>${Number(w.amount)} GRAM</b> was returned to your balance.${note ? `\nReason: ${esc(note)}` : ""}`,
+      ? `<b>✅ Withdrawal sent!</b>\n\n<b>${Number(w.amount)} ${w.currency}</b> is on its way to your wallet.${note ? `\nTx: <code>${esc(note)}</code>` : ""}`
+      : `<b>Withdrawal returned</b>\n\n<b>${Number(w.amount)} ${w.currency}</b> was returned to your balance.${note ? `\nReason: ${esc(note)}` : ""}`,
   });
   return { ok: true };
 }

@@ -11,16 +11,16 @@ import { PaySheet, type PayItem } from "@/components/game/PaySheet";
 import { useAdAction } from "@/components/game/useAdAction";
 import { claimMiningFn } from "@/lib/game.functions";
 import { art } from "@/lib/art";
-import { RULES, fmtGram } from "@/lib/game-rules";
+import { PUBG_ICON, RULES, fmtGram, fmtPubg } from "@/lib/game-rules";
 import { haptic } from "@/lib/telegram-client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "DROPZONE — Base" },
-      { name: "description", content: "Your DROPZONE base: live $GRAM mining, airdrop crates and boosts." },
-      { property: "og:title", content: "DROPZONE — Base" },
-      { property: "og:description", content: "Live $GRAM mining, airdrop crates and boosts on Telegram." },
+      { title: "PUBG — Base" },
+      { name: "description", content: "Your PUBG base: live $PUBG mining, airdrop crates and boosts." },
+      { property: "og:title", content: "PUBG — Base" },
+      { property: "og:description", content: "Live $PUBG mining, airdrop crates and boosts on Telegram." },
     ],
   }),
   component: Base,
@@ -64,7 +64,7 @@ function Base() {
       }
       const r = await claimMiningFn({ data: { ...auth(), double } });
       haptic("success");
-      toast.success(`+${fmtGram(r.amount, 6)} GRAM claimed${r.doubled ? " · doubled!" : ""}`);
+      toast.success(`+${fmtPubg(r.amount, 4)} PUBG claimed${r.doubled ? " · doubled!" : ""}`);
       await refresh("state", "wallet");
     } catch (e) {
       toast.error(errMsg(e));
@@ -77,19 +77,33 @@ function Base() {
     <div className="page">
       <Masthead
         lead="Mine"
-        dots="GRAM"
+        dots="PUBG"
         line2="in the drop zone"
-        intro="Deploy servers, open airdrop crates and squad up — every drop lands straight in your balance."
+        intro="Deploy servers, open airdrop crates and squad up. Swap your PUBG to GRAM anytime."
         right={
           s && (
             <Link to="/wallet" className="glass flex shrink-0 flex-col items-end px-3 py-2">
-              <span className="eyebrow !text-[9.5px]">Balance</span>
-              <span className="mt-0.5 text-[15px] font-semibold tabular text-ink">{fmtGram(s.me.balance)}</span>
+              <span className="flex items-center gap-1 text-[15px] font-semibold tabular text-ink">
+                <img src={PUBG_ICON} alt="" className="h-4 w-4 rounded-full" />
+                {fmtPubg(s.me.balance, 0)}
+              </span>
+              <span className="mt-0.5 text-[10.5px] text-copy tabular">{fmtGram(s.me.gram)} GRAM</span>
             </Link>
           )
         }
       />
       <StateGate isLoading={q.isLoading} error={q.error}>
+        {s && (
+          <Link to="/wallet" className="glass mb-[var(--gap)] flex items-center gap-3 px-4 py-3">
+            <img src={PUBG_ICON} alt="PUBG" className="h-8 w-8 rounded-full" />
+            <div className="flex-1">
+              <p className="text-[13px] font-semibold">PUBG price</p>
+              <p className="text-[11.5px] text-copy tabular">1 GRAM = {fmtPubg(s.market.pubgPerGram, 0)} PUBG</p>
+            </div>
+            <span className="text-[14px] font-semibold tabular">{s.market.pubgUsd ? `$${s.market.pubgUsd.toFixed(8)}` : "—"}</span>
+            <span className="chip !h-7">Swap</span>
+          </Link>
+        )}
         {s && (
           <div className="grid gap-[var(--gap)] md:grid-cols-3">
             {/* Mining rig */}
@@ -114,16 +128,16 @@ function Base() {
                   </div>
                   <div className="absolute inset-x-0 bottom-[4%] flex items-end justify-center gap-[2%]">
                     <span style={{ height: "calc(40 * var(--u))" }}>
-                      <DotText text={live.pending.toFixed(6)} r={2.05} />
+                      <DotText text={live.pending.toFixed(live.pending >= 1000 ? 1 : 4)} r={2.05} />
                     </span>
                   </div>
                 </div>
                 <p className="mt-[2%] text-center" style={{ fontSize: "calc(18 * var(--u))", color: "var(--on-card-soft)" }}>
                   {s.mining.activeCount > 0 ? (
                     <>
-                      GRAM in backpack · {Math.round(live.fill * 100)}% full
+                      PUBG in backpack · {Math.round(live.fill * 100)}% full
                       <br />
-                      {fmtGram(s.mining.ratePerDay, 5)} GRAM / day
+                      {fmtPubg(s.mining.ratePerDay)} PUBG / day
                     </>
                   ) : (
                     <>
@@ -243,7 +257,7 @@ function Base() {
                   <div key={sv.id} className="glass w-[150px] shrink-0 p-3">
                     <img src={art(sv.image)} alt={sv.name} className="mx-auto h-20 w-20 object-contain" />
                     <p className="mt-2 truncate text-[13px] font-semibold">{sv.name}</p>
-                    <p className="text-[11.5px] text-copy tabular">{fmtGram(sv.dailyRate, 5)}/day</p>
+                    <p className="text-[11.5px] text-copy tabular">{fmtPubg(sv.dailyRate)} PUBG/day</p>
                     <p className="text-[11px] text-copy">{daysLeft(sv.expiresAt)}</p>
                   </div>
                 ))}

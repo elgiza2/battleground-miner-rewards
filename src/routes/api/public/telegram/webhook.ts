@@ -54,14 +54,14 @@ async function handle(u: Update): Promise<unknown> {
     const { error } = await db.from("bg_gift_claims").insert({ gift_id: gift.id, telegram_id: q.from.id });
     if (error) return T.tg("answerCallbackQuery", { callback_query_id: q.id, text: "Already claimed ✅", show_alert: false });
     await db.rpc("bg_credit", { _tid: q.from.id, _amount: Number(gift.amount), _reason: "gift", _meta: { gift: gift.id } });
-    await T.tg("answerCallbackQuery", { callback_query_id: q.id, text: `🎁 +${Number(gift.amount)} GRAM added to your balance!`, show_alert: true });
+    await T.tg("answerCallbackQuery", { callback_query_id: q.id, text: `🎁 +${Number(gift.amount)} PUBG added to your balance!`, show_alert: true });
     if (q.message) {
       await T.tg("editMessageReplyMarkup", {
         chat_id: q.message.chat.id,
         message_id: q.message.message_id,
         reply_markup: T.kb([
-          [{ text: `✅  CLAIMED +${Number(gift.amount)} GRAM`, callback_data: "noop" }],
-          ...(origin ? [[{ text: "▶  PLAY DROPZONE", web_app: { url: origin }, style: "success" as const }]] : []),
+          [{ text: `✅  CLAIMED +${Number(gift.amount)} PUBG`, callback_data: "noop" }],
+          ...(origin ? [[{ text: "▶  PLAY PUBG", web_app: { url: origin }, style: "success" as const }]] : []),
         ]),
       });
     }
@@ -76,15 +76,15 @@ async function handle(u: Update): Promise<unknown> {
     const { player } = await G.ensurePlayer(msg.from, payload, { fromBot: true });
     const cfg = await G.getConfig();
     const share = cfg.botUsername
-      ? `https://t.me/share/url?url=${encodeURIComponent(`https://t.me/${cfg.botUsername}?startapp=r${player.telegram_id}`)}&text=${encodeURIComponent("🪂 Drop into DROPZONE with me and mine $GRAM!")}`
+      ? `https://t.me/share/url?url=${encodeURIComponent(`https://t.me/${cfg.botUsername}?startapp=r${player.telegram_id}`)}&text=${encodeURIComponent("🪂 Drop into PUBG with me and mine $PUBG!")}`
       : null;
     const rows: Parameters<typeof T.kb>[0] = [];
-    if (origin) rows.push([{ text: "▶  PLAY DROPZONE", web_app: { url: origin }, style: "success" }]);
+    if (origin) rows.push([{ text: "▶  PLAY PUBG", web_app: { url: origin }, style: "success" }]);
     if (share) rows.push([{ text: "🔥  INVITE & EARN 20%", url: share, style: "primary" }]);
     if (cfg.community) rows.push([{ text: "📢  JOIN COMMUNITY", url: `https://t.me/${cfg.community}`, style: "danger" }]);
     const caption =
-      `<b>🪂 WELCOME TO DROPZONE, ${T.esc(msg.from.first_name ?? "SOLDIER").toUpperCase()}</b>\n\n` +
-      `<b>Drop in. Mine $GRAM. Cash out in TON.</b>\n\n` +
+      `<b>🪂 WELCOME TO PUBG, ${T.esc(msg.from.first_name ?? "SOLDIER").toUpperCase()}</b>\n\n` +
+      `<b>Drop in. Mine $PUBG. Swap to GRAM. Cash out.</b>\n\n` +
       `<b>⛏  Deploy servers</b> — they mine 24/7\n` +
       `<b>📦  Open airdrop crates</b> — instant loot\n` +
       `<b>🔥  Build your squad</b> — earn 20% of their mining\n\n` +
@@ -114,7 +114,7 @@ async function handle(u: Update): Promise<unknown> {
       chat_id: msg.chat.id,
       text: "<b>Your servers are mining. Jump back in 👇</b>",
       parse_mode: "HTML",
-      reply_markup: T.kb([[{ text: "▶  PLAY DROPZONE", web_app: { url: origin }, style: "success" }]]),
+      reply_markup: T.kb([[{ text: "▶  PLAY PUBG", web_app: { url: origin }, style: "success" }]]),
     });
   }
   return null;

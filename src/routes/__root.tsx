@@ -15,6 +15,7 @@ import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { initTelegram } from "@/lib/telegram-client";
+import { loadAdSdk } from "@/lib/ads";
 import { Dock } from "@/components/game/Dock";
 import { FilterDefs } from "@/components/game/GlassCard";
 
@@ -63,10 +64,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" },
       { name: "theme-color", content: "#ececeb" },
-      { title: "DROPZONE — Mine $GRAM" },
-      { name: "description", content: "DROPZONE is a battle-royale mining game on Telegram. Deploy servers, open airdrop crates and mine $GRAM on TON." },
-      { property: "og:title", content: "DROPZONE — Mine $GRAM" },
-      { property: "og:description", content: "Deploy servers, open airdrop crates and mine $GRAM on TON." },
+      { title: "PUBG — Mine $PUBG" },
+      { name: "description", content: "PUBG is a battle-royale mining game on Telegram. Deploy servers, open airdrop crates and mine $PUBG on TON." },
+      { property: "og:title", content: "PUBG — Mine $PUBG" },
+      { property: "og:description", content: "Deploy servers, open airdrop crates and mine $PUBG on TON." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -79,7 +80,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     scripts: [
       { src: "https://telegram.org/js/telegram-web-app.js?59" },
-      { src: "https://sad.adsgram.ai/js/sad.min.js" },
     ],
   }),
   shellComponent: RootShell,
@@ -108,6 +108,7 @@ function RootComponent() {
   const isAdmin = path.startsWith("/101");
   useEffect(() => {
     initTelegram();
+    void loadAdSdk();
   }, []);
   return (
     <QueryClientProvider client={queryClient}>

@@ -1,6 +1,6 @@
 import { beginCell, Address } from "@ton/core";
 import { supabaseAdmin as db } from "@/integrations/supabase/client.server";
-import { RULES, TREASURY_ADDRESS, adsServerProgress, checkWithdraw, squadServerReady, toNano } from "./game-rules";
+import { PUBG_JETTON, RULES, TREASURY_ADDRESS, adsServerProgress, checkWithdraw, quoteSwap, squadServerReady, toNano, withdrawMin, type Currency } from "./game-rules";
 import { botToken, esc, kb, tg, verifyInitData, type TgUser } from "./telegram.server";
 
 export const DEMO_ID = 100000001;
@@ -18,14 +18,14 @@ export async function resolveUser(initData: string): Promise<{ user: TgUser; sta
   const token = botToken();
   if (initData && token) {
     const v = verifyInitData(initData, token);
-    if (!v) fail("Session expired. Reopen DROPZONE from Telegram.");
+    if (!v) fail("Session expired. Reopen PUBG from Telegram.");
     return { user: v!.user, startParam: v!.startParam };
   }
   if (import.meta.env.DEV && !initData) {
     return { user: { id: DEMO_ID, first_name: "Demo", username: "demo_player" }, startParam: null };
   }
   if (!token) fail("The game is being set up. Please try again soon.");
-  return fail("Open DROPZONE inside Telegram.");
+  return fail("Open PUBG inside Telegram.");
 }
 
 export type Player = Awaited<ReturnType<typeof loadPlayer>>;
@@ -84,7 +84,7 @@ export async function ensurePlayer(user: TgUser, startParam: string | null, opts
         void tg("sendMessage", {
           chat_id: referrer.telegram_id,
           parse_mode: "HTML",
-          text: `<b>🪂 New recruit landed!</b>\n\n<b>${esc(user.first_name ?? "A friend")}</b> joined your squad.\n<b>+${RULES.inviteBonus} GRAM</b> added — and you earn <b>20%</b> of everything they mine. 🔥`,
+          text: `<b>🪂 New recruit landed!</b>\n\n<b>${esc(user.first_name ?? "A friend")}</b> joined your squad.\n<b>+${RULES.inviteBonus} PUBG</b> added — and you earn <b>20%</b> of everything they mine. 🔥`,
         });
       }
     }
@@ -138,6 +138,48 @@ export async function getConfig() {
   return { botUsername, community };
 }
 
+// ---------- market ----------
+
+type Market = { pubg_per_gram: number; swap_fee: number; pubg_usd?: number; gram_usd?: number; updated_at?: string };
+
+async function stonPrice(addr: string) {
+  try {
+    const r = await fetch(`https://api.ston.fi/v1/assets/${addr}`);
+    const j = (await r.json()) as { asset?: { dex_price_usd?: string } };
+    const v = Number(j.asset?.dex_price_usd);
+    return Number.isFinite(v) && v > 0 ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getMarket(): Promise<Market> {
+  const { data } = await db.from("bg_config").select("value").eq("key", "market").maybeSingle();
+  const m = (data?.value ?? { pubg_per_gram: 11000, swap_fee: RULES.swapFee }) as Market;
+  const age = m.updated_at ? Date.now() - new Date(m.updated_at).getTime() : Infinity;
+  if (age > 10 * 60_000) {
+    const [pubg, gram] = await Promise.all([stonPrice(PUBG_JETTON), stonPrice("EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c")]);
+    if (pubg && gram) {
+      const next: Market = { ...m, pubg_usd: pubg, gram_usd: gram, pubg_per_gram: Math.round(gram / pubg), updated_at: new Date().toISOString() };
+      await db.from("bg_config").upsert({ key: "market", value: next as never });
+      return next;
+    }
+  }
+  return m;
+}
+
+export async function swapPubg(initData: string, pubg: number) {
+  const { player: p } = await authPlayer(initData);
+  if (!(pubg >= RULES.swapMinPubg)) fail(`Minimum swap is ${RULES.swapMinPubg} PUBG`);
+  if (n(p.balance) < pubg) fail("Not enough PUBG");
+  const m = await getMarket();
+  const gram = quoteSwap(pubg, m.pubg_per_gram, m.swap_fee ?? RULES.swapFee);
+  if (gram <= 0) fail("Amount too small");
+  const { error } = await db.rpc("bg_swap", { _tid: p.telegram_id, _pubg: pubg, _gram: gram });
+  if (error) fail("Not enough PUBG");
+  return { gram, pubg };
+}
+
 // ---------- mining ----------
 
 async function ownedServers(id: number) {
@@ -167,12 +209,13 @@ async function ownedServers(id: number) {
 
 export async function getState(initData: string) {
   const { user, player: p } = await authPlayer(initData);
-  const [servers, cfg, pendingRes, opRes, role] = await Promise.all([
+  const [servers, cfg, pendingRes, opRes, role, market] = await Promise.all([
     ownedServers(p.telegram_id),
     getConfig(),
     db.rpc("bg_pending", { _tid: p.telegram_id, _cap_hours: RULES.storageHours }),
     db.from("bg_operators").select("boost_pct, name, image").eq("id", p.operator_id).maybeSingle(),
     adminRole(user),
+    getMarket(),
   ]);
   const active = servers.filter((s) => s.active);
   const baseRate = active.reduce((a, s) => a + s.dailyRate, 0);
@@ -190,6 +233,7 @@ export async function getState(initData: string) {
       username: p.username,
       photo: p.photo_url,
       balance: n(p.balance),
+      gram: n(p.gram_balance),
       totalMined: n(p.total_mined),
       refCount: p.ref_count,
       refEarned: n(p.total_ref_earned),
@@ -221,6 +265,7 @@ export async function getState(initData: string) {
       squad: { ready: squadServerReady(p.ref_count, squadClaimed), claimed: squadClaimed, goal: RULES.freeSquadServerGoal, progress: Math.min(p.ref_count, RULES.freeSquadServerGoal) },
     },
     config: cfg,
+    market: { pubgPerGram: market.pubg_per_gram, pubgUsd: market.pubg_usd ?? null, gramUsd: market.gram_usd ?? null, swapFee: market.swap_fee ?? RULES.swapFee },
     role,
   };
 }
@@ -252,7 +297,7 @@ export async function recordAd(initData: string) {
     return { ok: false as const, error: r.error === "daily_cap" ? "Daily video limit reached. Back tomorrow!" : "Slow down — wait a few seconds between videos." };
   }
   if (r.ads_today === 10 && p.referrer_id) {
-    void db.rpc("bg_credit", { _tid: p.referrer_id, _amount: 0.003, _reason: "recruit_active", _meta: { from: p.telegram_id } });
+    void db.rpc("bg_credit", { _tid: p.referrer_id, _amount: RULES.recruitActiveBonus, _reason: "recruit_active", _meta: { from: p.telegram_id } });
   }
   return { ok: true as const, adsToday: r.ads_today ?? 0, adsTotal: r.ads_total ?? 0, reward: RULES.adReward };
 }
@@ -293,7 +338,7 @@ export async function getCatalog(initData: string) {
       equipped: p.operator_id === r.id,
     })),
     adsTotal: p.ads_total,
-    balance: n(p.balance),
+    balance: n(p.gram_balance),
   };
 }
 
@@ -311,21 +356,22 @@ async function grantServer(tid: number, serverId: number, source: string) {
 
 async function payUplineForPurchase(p: NonNullable<Player>, amount: number) {
   if (p.referrer_id) {
-    await db.rpc("bg_credit", { _tid: p.referrer_id, _amount: +(amount * RULES.purchaseL1).toFixed(9), _reason: "squad_purchase_l1", _meta: { from: p.telegram_id } });
+    await db.rpc("bg_credit_gram", { _tid: p.referrer_id, _amount: +(amount * RULES.purchaseL1).toFixed(9), _reason: "squad_purchase_l1", _meta: { from: p.telegram_id } });
   }
   if (p.referrer2_id) {
-    await db.rpc("bg_credit", { _tid: p.referrer2_id, _amount: +(amount * RULES.purchaseL2).toFixed(9), _reason: "squad_purchase_l2", _meta: { from: p.telegram_id } });
+    await db.rpc("bg_credit_gram", { _tid: p.referrer2_id, _amount: +(amount * RULES.purchaseL2).toFixed(9), _reason: "squad_purchase_l2", _meta: { from: p.telegram_id } });
   }
 }
 
 export async function buyWithBalance(initData: string, kind: "server" | "operator", ref: string) {
   const { player: p } = await authPlayer(initData);
   const price = await itemPrice(kind, ref);
-  if (n(p.balance) < price) fail("Not enough GRAM in your balance");
-  const { error } = await db.rpc("bg_credit", { _tid: p.telegram_id, _amount: -price, _reason: `buy_${kind}`, _meta: { ref } });
-  if (error) fail("Not enough GRAM in your balance");
+  if (n(p.gram_balance) < price) fail("Not enough GRAM — swap some PUBG first");
+  const { error } = await db.rpc("bg_credit_gram", { _tid: p.telegram_id, _amount: -price, _reason: `buy_${kind}`, _meta: { ref } });
+  if (error) fail("Not enough GRAM — swap some PUBG first");
   await db.from("bg_players").update({ total_spent: n(p.total_spent) + price }).eq("telegram_id", p.telegram_id);
   const name = await fulfillItem(p, kind, ref);
+  await payUplineForPurchase(p, price);
   return { ok: true, name };
 }
 
@@ -466,12 +512,12 @@ async function reconcileOne(pay: PaymentRow, txs: TonTx[]) {
       .update({ status: "pending" })
       .eq("id", pay.ref ?? "")
       .eq("status", "awaiting_fee")
-      .select("amount,wallet")
+      .select("amount,wallet,currency")
       .maybeSingle();
     label = "withdraw fee";
     if (w) {
       await notifyAdmins(
-        `<b>💸 Withdrawal request</b>\n\nUser: <b>${esc(player.first_name ?? "")}</b> ${player.username ? "@" + esc(player.username) : ""} (<code>${player.telegram_id}</code>)\nAmount: <b>${n(w.amount)} GRAM</b>\nWallet: <code>${esc(w.wallet)}</code>\n\nOpen /101 to approve.`,
+        `<b>💸 Withdrawal request</b>\n\nUser: <b>${esc(player.first_name ?? "")}</b> ${player.username ? "@" + esc(player.username) : ""} (<code>${player.telegram_id}</code>)\nAmount: <b>${n(w.amount)} ${w.currency}</b>\nWallet: <code>${esc(w.wallet)}</code>\n\nOpen /101 to approve.`,
       );
     }
   } else {
@@ -625,11 +671,12 @@ export function normalizeWallet(addr: string) {
 export async function getWallet(initData: string) {
   const { player: p } = await authPlayer(initData);
   const [{ data: w }, { data: ledger }] = await Promise.all([
-    db.from("bg_withdrawals").select("id, amount, wallet, status, created_at, processed_at").eq("telegram_id", p.telegram_id).order("created_at", { ascending: false }).limit(20),
-    db.from("bg_ledger").select("amount, reason, created_at").eq("telegram_id", p.telegram_id).order("created_at", { ascending: false }).limit(30),
+    db.from("bg_withdrawals").select("id, amount, wallet, status, currency, created_at, processed_at").eq("telegram_id", p.telegram_id).order("created_at", { ascending: false }).limit(20),
+    db.from("bg_ledger").select("amount, reason, currency, created_at").eq("telegram_id", p.telegram_id).order("created_at", { ascending: false }).limit(30),
   ]);
   return {
     balance: n(p.balance),
+    gram: n(p.gram_balance),
     wallet: p.wallet_address,
     joinedCommunity: p.joined_channel,
     refCount: p.ref_count,
@@ -639,23 +686,24 @@ export async function getWallet(initData: string) {
   };
 }
 
-export async function requestWithdraw(initData: string, amount: number, wallet: string) {
+export async function requestWithdraw(initData: string, amount: number, wallet: string, currency: Currency) {
   const { player: p } = await authPlayer(initData);
   if (p.telegram_id === DEMO_ID) fail("Withdrawals work inside Telegram only");
   const addr = normalizeWallet(wallet);
   if (!addr) fail("Enter a valid TON wallet address");
   const { community } = await getConfig();
   const joined = community ? await isMember(community, p.telegram_id) : false;
-  const check = checkWithdraw({ amount, balance: n(p.balance), joinedCommunity: joined, referrals: p.ref_count, adsTotal: p.ads_total });
-  if (!check.amountOk) fail(`Minimum withdrawal is ${RULES.withdrawMin} GRAM`);
+  const bal = currency === "GRAM" ? n(p.gram_balance) : n(p.balance);
+  const check = checkWithdraw({ currency, amount, balance: bal, joinedCommunity: joined, referrals: p.ref_count, adsTotal: p.ads_total });
+  if (!check.amountOk) fail(`Minimum withdrawal is ${withdrawMin(currency)} ${currency}`);
   if (!check.balanceOk) fail("Not enough balance");
   if (!check.communityOk) fail("Join our community first");
   if (!check.activityOk) fail(`Invite ${RULES.withdrawAltReferrals} friend or watch ${RULES.withdrawAltAds} videos first`);
-  const { error } = await db.rpc("bg_credit", { _tid: p.telegram_id, _amount: -amount, _reason: "withdraw_hold" });
+  const { error } = await db.rpc(currency === "GRAM" ? "bg_credit_gram" : "bg_credit", { _tid: p.telegram_id, _amount: -amount, _reason: "withdraw_hold" });
   if (error) fail("Not enough balance");
   const { data: wd, error: e2 } = await db
     .from("bg_withdrawals")
-    .insert({ telegram_id: p.telegram_id, amount, wallet: addr!, status: "awaiting_fee" })
+    .insert({ telegram_id: p.telegram_id, amount, wallet: addr!, status: "awaiting_fee", currency })
     .select("id")
     .single();
   if (e2) throw e2;
@@ -673,10 +721,10 @@ export async function cancelWithdraw(initData: string, id: string) {
     .eq("id", id)
     .eq("telegram_id", p.telegram_id)
     .eq("status", "awaiting_fee")
-    .select("amount")
+    .select("amount, currency")
     .maybeSingle();
   if (!data) fail("This withdrawal can't be cancelled");
-  await db.rpc("bg_credit", { _tid: p.telegram_id, _amount: n(data!.amount), _reason: "withdraw_refund" });
+  await db.rpc(data!.currency === "GRAM" ? "bg_credit_gram" : "bg_credit", { _tid: p.telegram_id, _amount: n(data!.amount), _reason: "withdraw_refund" });
   return { ok: true };
 }
 

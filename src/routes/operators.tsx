@@ -13,9 +13,9 @@ import { fmtGram } from "@/lib/game-rules";
 export const Route = createFileRoute("/operators")({
   head: () => ({
     meta: [
-      { title: "Operators — DROPZONE" },
-      { name: "description", content: "Recruit operators that boost your $GRAM mining speed." },
-      { property: "og:title", content: "Operators — DROPZONE" },
+      { title: "Operators — PUBG" },
+      { name: "description", content: "Recruit operators that boost your $PUBG mining speed." },
+      { property: "og:title", content: "Operators — PUBG" },
       { property: "og:description", content: "From Rookie to Legend — each operator boosts every server you run." },
     ],
   }),

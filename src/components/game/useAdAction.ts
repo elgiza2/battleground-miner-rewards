@@ -25,7 +25,7 @@ export function useAdAction() {
         return false;
       }
       haptic("success");
-      if (!opts.silent) toast.success(`+${RULES.adReward} GRAM · +${RULES.adBoostMinutes} min 2x boost`, { description: `${r.adsToday} videos today` });
+      if (!opts.silent) toast.success(`+${RULES.adReward} PUBG · +${RULES.adBoostMinutes} min 2x boost`, { description: `${r.adsToday} videos today` });
       await refresh("state", "missions");
       return true;
     } catch (e) {

@@ -62,8 +62,12 @@ export const checkCommunityFn = createServerFn({ method: "POST" })
   .handler(({ data }) => G.checkCommunity(data.initData));
 
 export const requestWithdrawFn = createServerFn({ method: "POST" })
-  .inputValidator(v({ amount: z.number().positive().max(1_000_000), wallet: z.string().min(10).max(80) }))
-  .handler(({ data }) => G.requestWithdraw(data.initData, data.amount, data.wallet));
+  .inputValidator(v({ amount: z.number().positive().max(1_000_000_000), wallet: z.string().min(10).max(80), currency: z.enum(["PUBG", "GRAM"]) }))
+  .handler(({ data }) => G.requestWithdraw(data.initData, data.amount, data.wallet, data.currency));
+
+export const swapFn = createServerFn({ method: "POST" })
+  .inputValidator(v({ pubg: z.number().positive().max(1_000_000_000) }))
+  .handler(({ data }) => G.swapPubg(data.initData, data.pubg));
 
 export const cancelWithdrawFn = createServerFn({ method: "POST" })
   .inputValidator(v({ id: z.string().uuid() }))

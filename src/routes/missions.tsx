@@ -8,16 +8,16 @@ import { GlassCard } from "@/components/game/GlassCard";
 import { DotText } from "@/components/game/DotText";
 import { useAdAction } from "@/components/game/useAdAction";
 import { claimTaskFn } from "@/lib/game.functions";
-import { RULES, fmtGram } from "@/lib/game-rules";
+import { RULES, fmtPubg } from "@/lib/game-rules";
 import { haptic, openTgLink } from "@/lib/telegram-client";
 
 export const Route = createFileRoute("/missions")({
   head: () => ({
     meta: [
-      { title: "Missions — DROPZONE" },
-      { name: "description", content: "Daily video ladder, invite missions and check-in streaks that pay $GRAM." },
-      { property: "og:title", content: "Missions — DROPZONE" },
-      { property: "og:description", content: "Climb the 1000-video ladder and invite missions for $GRAM rewards." },
+      { title: "Missions — PUBG" },
+      { name: "description", content: "Daily video ladder, invite missions and check-in streaks that pay $PUBG." },
+      { property: "og:title", content: "Missions — PUBG" },
+      { property: "og:description", content: "Climb the 1000-video ladder and invite missions for $PUBG rewards." },
     ],
   }),
   component: Missions,
@@ -48,7 +48,7 @@ function Missions() {
     try {
       const r = await claimTaskFn({ data: { ...auth(), taskId: t.id } });
       haptic("success");
-      toast.success(`+${fmtGram(r.reward, 6)} GRAM`, { description: t.title });
+      toast.success(`+${fmtPubg(r.reward)} PUBG`, { description: t.title });
       await refresh("missions", "state", "wallet");
     } catch (e) {
       toast.error(errMsg(e));
@@ -94,7 +94,7 @@ function Missions() {
 
   return (
     <div className="page">
-      <Masthead lead="Daily" dots="1000" line2="video challenge" intro="Every video drops instant GRAM and 10 minutes of 2x mining. Climb the ladder before midnight UTC." />
+      <Masthead lead="Daily" dots="1000" line2="video challenge" intro="Every video drops instant PUBG and 10 minutes of 2x mining. Climb the ladder before midnight UTC." />
       <StateGate isLoading={m.isLoading} error={m.error}>
         <GlassCard variant="speed" video className="entrance">
           <div className="p-5">
@@ -112,7 +112,7 @@ function Missions() {
             {next && (
               <>
                 <div className="mt-4 mb-1 flex justify-between text-[12.5px] text-on-card-soft">
-                  <span>Next: {next.title} · +{fmtGram(next.reward, 6)}</span>
+                  <span>Next: {next.title} · +{fmtPubg(next.reward)} PUBG</span>
                   <span className="tabular">
                     {adsToday}/{next.goal}
                   </span>
@@ -155,7 +155,7 @@ function Section({ title, items, action }: { title: string; items: Mission[]; ac
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[14px] font-semibold">{t.title}</p>
                 <p className="truncate text-[12px] text-copy">
-                  +{fmtGram(t.reward, 6)} GRAM{t.kind === "checkin" ? " × streak" : ""} · {t.description}
+                  +{fmtPubg(t.reward)} PUBG{t.kind === "checkin" ? " × streak" : ""} · {t.description}
                 </p>
                 {showBar && !t.claimed && (
                   <div className="meter meter--paper mt-1.5">

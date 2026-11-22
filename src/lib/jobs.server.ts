@@ -19,10 +19,10 @@ export async function setOrigin(url: string) {
 
 const TEMPLATES: ((name: string, balance: string) => string)[] = [
   (name) => `<b>⛏️ ${name}, your servers are filling up!</b>\n\nYour backpack holds 8 hours of loot. <b>Claim it now</b> before it stops filling.`,
-  () => `<b>📦 Airdrop incoming!</b>\n\nCrates are dropping right now.\n<b>Every video = instant GRAM + 2x mining boost.</b>`,
+  () => `<b>📦 Airdrop incoming!</b>\n\nCrates are dropping right now.\n<b>Every video = instant PUBG + 2x mining boost.</b>`,
   () => `<b>🔥 Squad bonus is live</b>\n\nInvite friends and take <b>20%</b> of everything they mine — forever. Plus <b>10%</b> of every server they buy.`,
   () => `<b>🏆 Chicken Dinner Challenge</b>\n\nWatch <b>1000 videos today</b> and grab the biggest daily reward. The ladder resets at midnight UTC.`,
-  (_n, balance) => `<b>💎 Balance check: ${balance} GRAM</b>\n\nKeep the rigs running — withdrawals open at <b>${RULES.withdrawMin} GRAM</b>.`,
+  (_n, balance) => `<b>💎 Balance check: ${balance} PUBG</b>\n\nKeep the rigs running — swap to GRAM anytime and cash out from <b>${RULES.withdrawMinGram} GRAM</b>.`,
   () => `<b>⚡ Battle Pass: 2x for 24h</b>\n\nDouble every drop today for just <b>${RULES.battlePassPrice} GRAM</b>.`,
   () => `<b>🪂 New servers just landed</b>\n\nUpgrade your base — higher tiers mine faster and pay back more.`,
 ];
@@ -60,9 +60,9 @@ function buttons(origin: string | null, botUsername: string | null, extra?: { te
   const rows: Parameters<typeof kb>[0] = [];
   if (extra) rows.push([{ ...extra, style: "success" }]);
   const play = origin
-    ? { text: "▶  PLAY DROPZONE", web_app: { url: origin }, style: extra ? ("primary" as const) : ("success" as const) }
+    ? { text: "▶  PLAY PUBG", web_app: { url: origin }, style: extra ? ("primary" as const) : ("success" as const) }
     : botUsername
-      ? { text: "▶  PLAY DROPZONE", url: `https://t.me/${botUsername}?startapp=bot`, style: "success" as const }
+      ? { text: "▶  PLAY PUBG", url: `https://t.me/${botUsername}?startapp=bot`, style: "success" as const }
       : null;
   if (play) rows.push([play]);
   return kb(rows);
@@ -95,13 +95,13 @@ async function processJob(key: string, deadline: number) {
           let text: string;
           let markup;
           if (payload.type === "gift") {
-            text = `<b>🎁 Daily supply gift!</b>\n\n<b>${payload.amount} GRAM</b> is waiting for you, ${esc(pl.first_name ?? "soldier")}.\nTap below — it lands in your balance instantly.`;
+            text = `<b>🎁 Daily supply gift!</b>\n\n<b>${payload.amount} PUBG</b> is waiting for you, ${esc(pl.first_name ?? "soldier")}.\nTap below — it lands in your balance instantly.`;
             markup = buttons(origin, cfg.botUsername, { text: "🎁  CLAIM GIFT", callback_data: `g:${payload.giftId}` });
           } else if (payload.type === "custom") {
             text = payload.text ?? "";
             markup = buttons(origin, cfg.botUsername);
           } else {
-            text = TEMPLATES[tplIndex]!(esc(pl.first_name ?? "Soldier"), Number(pl.balance).toFixed(4));
+            text = TEMPLATES[tplIndex]!(esc(pl.first_name ?? "Soldier"), Math.floor(Number(pl.balance)).toLocaleString("en-US"));
             markup = buttons(origin, cfg.botUsername);
           }
           const r = await tg("sendMessage", { chat_id: pl.telegram_id, text, parse_mode: "HTML", reply_markup: markup });
@@ -127,11 +127,11 @@ async function generatePost(slot: string) {
   try {
     const cfg = await getConfig();
     if (!cfg.community) throw new Error("community not configured");
-    const themes = ["a new airdrop wave", "a squad invite contest", "the Chicken Dinner 1000-video challenge", "golden servers landing", "a Battle Pass 2x weekend", "a new operator unlocked", "mining tips for beginners", "a GRAM payout milestone"];
+    const themes = ["a new airdrop wave", "a squad invite contest", "the Chicken Dinner 1000-video challenge", "golden servers landing", "a Battle Pass 2x weekend", "a new operator unlocked", "mining tips for beginners", "a PUBG payout milestone"];
     const theme = themes[Math.floor(Math.random() * themes.length)]!;
     const text = await generateResponse({
       model: "openai/gpt-6-astra",
-      input: `Write a short Telegram channel post in English for DROPZONE, a battle-royale themed TON mining game where players mine $GRAM with servers, watch videos for airdrop crates and invite friends. Topic: ${theme}. Return strictly JSON: {"headline": "max 6 words, punchy, with 1 emoji", "body": "2-3 short lines, energetic, no hashtags, no prices or promises of profit"}.`,
+      input: `Write a short Telegram channel post in English for PUBG, a battle-royale themed TON mining game where players mine $PUBG with servers, watch videos for airdrop crates and invite friends. Topic: ${theme}. Return strictly JSON: {"headline": "max 6 words, punchy, with 1 emoji", "body": "2-3 short lines, energetic, no hashtags, no prices or promises of profit"}.`,
     });
     const raw = (text as { output_text?: string }).output_text ?? JSON.stringify(text);
     const match = /\{[\s\S]*\}/.exec(raw);
@@ -147,7 +147,7 @@ async function generatePost(slot: string) {
     const b64 = (img as { data?: { b64_json?: string }[] }).data?.[0]?.b64_json;
     if (!b64) throw new Error("no image");
     const caption = `<b>${esc(headline)}</b>\n\n${esc(body)}`;
-    const markup = kb([[{ text: "▶  OPEN DROPZONE", url: cfg.botUsername ? `https://t.me/${cfg.botUsername}?startapp=news` : "https://t.me", style: "success" }]]);
+    const markup = kb([[{ text: "▶  OPEN PUBG", url: cfg.botUsername ? `https://t.me/${cfg.botUsername}?startapp=news` : "https://t.me", style: "success" }]]);
     const r = await tgSendPhotoBytes(`@${cfg.community.replace(/^@/, "")}`, Buffer.from(b64, "base64"), caption, markup);
     await db.from("bg_posts").update({ status: r.ok ? "sent" : "failed", text: caption, message_id: r.result?.message_id ?? null, error: r.ok ? null : r.description ?? "send failed" }).eq("id", claim.id);
   } catch (e) {

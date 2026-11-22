@@ -90,11 +90,11 @@ export function PaySheet({ item, balance, onClose }: { item: PayItem | null; bal
           {item.allowBalance && (
             <button className="pill pill--ink w-full" disabled={!!busy || balance < item.price} onClick={payBalance}>
               {busy === "balance" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Coins className="h-4 w-4" />}
-              Use balance · {fmtGram(balance)} GRAM
+              Use GRAM balance · {fmtGram(balance)}
             </button>
           )}
           <p className="text-center text-[12px] leading-relaxed text-copy">
-            Payments go to the DROPZONE treasury on TON. GRAM is TON — any TON wallet works.
+            Payments go to the PUBG treasury in GRAM (TON). Any TON wallet works.
           </p>
         </div>
       )}

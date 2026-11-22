@@ -21,7 +21,7 @@ export const Route = createFileRoute("/api/public/telegram/setup")({
           drop_pending_updates: false,
         });
         const menu = await T.tg("setChatMenuButton", { menu_button: { type: "web_app", text: "Play", web_app: { url: origin } } });
-        const cmds = await T.tg("setMyCommands", { commands: [{ command: "start", description: "Open DROPZONE" }] });
+        const cmds = await T.tg("setMyCommands", { commands: [{ command: "start", description: "Open PUBG" }] });
         return Response.json({ ok: hook.ok, webhook: hook, menu: menu.ok, commands: cmds.ok, origin });
       },
     },

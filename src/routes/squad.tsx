@@ -5,15 +5,15 @@ import { useSquad, useGameState } from "@/hooks/use-game";
 import { Masthead, StateGate } from "@/components/game/Masthead";
 import { GlassCard } from "@/components/game/GlassCard";
 import { DotText } from "@/components/game/DotText";
-import { RULES, fmtGram } from "@/lib/game-rules";
+import { RULES, fmtPubg } from "@/lib/game-rules";
 import { openTgLink } from "@/lib/telegram-client";
 
 export const Route = createFileRoute("/squad")({
   head: () => ({
     meta: [
-      { title: "Squad — invite & earn | DROPZONE" },
-      { name: "description", content: "Invite friends to DROPZONE and earn 20% of their mining plus 10% of their purchases." },
-      { property: "og:title", content: "Squad — invite & earn | DROPZONE" },
+      { title: "Squad — invite & earn | PUBG" },
+      { name: "description", content: "Invite friends to PUBG and earn 20% of their mining plus 10% of their purchases." },
+      { property: "og:title", content: "Squad — invite & earn | PUBG" },
       { property: "og:description", content: "Earn 20% of everything your squad mines, forever." },
     ],
   }),
@@ -30,7 +30,7 @@ function Squad() {
       toast("Invite link is being set up");
       return;
     }
-    const text = "🪂 Drop into DROPZONE with me — mine $GRAM, open airdrop crates and cash out in TON!";
+    const text = "🪂 Drop into PUBG with me — mine $PUBG, open airdrop crates and cash out in GRAM!";
     openTgLink(`https://t.me/share/url?url=${encodeURIComponent(d.link)}&text=${encodeURIComponent(text)}`);
   };
   const copy = async () => {
@@ -55,7 +55,7 @@ function Squad() {
                 <div className="mt-5" style={{ height: 42 }}>
                   <DotText text={String(d.refCount)} r={2.4} pitch={6} />
                 </div>
-                <p className="mt-3 text-[14px] text-on-card-soft tabular">Earned {fmtGram(d.refEarned, 6)} GRAM from your squad</p>
+                <p className="mt-3 text-[14px] text-on-card-soft tabular">Earned {fmtPubg(d.refEarned)} PUBG from your squad mining</p>
                 <div className="mt-5 flex gap-2">
                   <button className="pill flex-1" onClick={share}>
                     <Send className="h-4 w-4" /> Invite friends
@@ -70,8 +70,8 @@ function Squad() {
             <div className="mt-[var(--gap)] grid grid-cols-3 gap-[var(--gap)]">
               {[
                 { k: "Their mining", v: `${RULES.squadL1 * 100}%`, s: `+${RULES.squadL2 * 100}% level 2` },
-                { k: "Their buys", v: `${RULES.purchaseL1 * 100}%`, s: `+${RULES.purchaseL2 * 100}% level 2` },
-                { k: "Per recruit", v: `+${RULES.inviteBonus}`, s: "GRAM instantly" },
+                { k: "Their buys", v: `${RULES.purchaseL1 * 100}%`, s: `in GRAM · +${RULES.purchaseL2 * 100}% L2` },
+                { k: "Per recruit", v: `+${RULES.inviteBonus}`, s: "PUBG instantly" },
               ].map((x) => (
                 <div key={x.k} className="glass p-3">
                   <p className="eyebrow !text-[9.5px]">{x.k}</p>
@@ -119,7 +119,7 @@ function Squad() {
                 {d.recruits.map((r, i) => (
                   <div key={i} className="flex items-center justify-between px-4 py-3">
                     <span className="truncate text-[14px] font-medium">{r.name}</span>
-                    <span className="text-[12px] text-copy tabular">mined {fmtGram(r.mined, 5)}</span>
+                    <span className="text-[12px] text-copy tabular">mined {fmtPubg(r.mined, 0)} PUBG</span>
                   </div>
                 ))}
               </div>

@@ -8,16 +8,16 @@ import { GlassCard } from "@/components/game/GlassCard";
 import { PaySheet, type PayItem } from "@/components/game/PaySheet";
 import { claimFreeServerFn } from "@/lib/game.functions";
 import { art, tierVariant } from "@/lib/art";
-import { fmtGram } from "@/lib/game-rules";
+import { fmtGram, fmtPubg } from "@/lib/game-rules";
 import { haptic } from "@/lib/telegram-client";
 
 export const Route = createFileRoute("/servers")({
   head: () => ({
     meta: [
-      { title: "Armory — 90 mining servers | DROPZONE" },
+      { title: "Armory — 90 mining servers | PUBG" },
       { name: "description", content: "Pick from 90 battle-gear mining servers, from Field Radios to the Golden Airdrop." },
-      { property: "og:title", content: "Armory — 90 mining servers | DROPZONE" },
-      { property: "og:description", content: "Two free servers and 88 upgrades that mine $GRAM around the clock." },
+      { property: "og:title", content: "Armory — 90 mining servers | PUBG" },
+      { property: "og:description", content: "Two free servers and 88 upgrades that mine $PUBG around the clock." },
     ],
   }),
   component: Armory,
@@ -52,7 +52,7 @@ function Armory() {
 
   return (
     <div className="page">
-      <Masthead lead="Armory of" dots="90" line2="mining servers" intro="Every server mines $GRAM 24/7. Higher tiers mine faster and pay back more." />
+      <Masthead lead="Armory of" dots="90" line2="mining servers" intro="Every server mines $PUBG 24/7. Higher tiers mine faster and pay back more." />
       <StateGate isLoading={cat.isLoading || st.isLoading} error={cat.error ?? st.error}>
         {free && (
           <div className="grid grid-cols-2 gap-[var(--gap)]">
@@ -89,15 +89,14 @@ function Armory() {
 
         <div className="mt-4 grid grid-cols-2 gap-[var(--gap)] md:grid-cols-4">
           {paid.map((s) => {
-            const roi = (s.dailyRate * s.durationDays) / s.price;
-            return (
+                        return (
               <GlassCard key={s.id} variant={tierVariant(s.tier)} className="entrance">
                 <button
                   className="flex w-full flex-col p-3 text-left"
                   onClick={() =>
                     setPay({
                       title: s.name,
-                      subtitle: `${fmtGram(s.dailyRate, 5)} GRAM/day for ${s.durationDays} days · returns ${Math.round(roi * 100)}%`,
+                      subtitle: `Mines ${fmtPubg(s.dailyRate)} PUBG/day for ${s.durationDays} days — ${fmtPubg(s.dailyRate * s.durationDays, 0)} PUBG total.`,
                       image: art(s.image),
                       price: s.price,
                       purpose: "server",
@@ -112,7 +111,7 @@ function Armory() {
                   </div>
                   <img src={art(s.image)} alt={s.name} loading="lazy" className="mx-auto my-2 h-24 w-24 object-contain drop-shadow-xl" style={{ filter: `saturate(${1 + s.level * 0.06})` }} />
                   <p className="truncate text-[14px] font-semibold">{s.name}</p>
-                  <p className="text-[12px] text-on-card-soft tabular">{fmtGram(s.dailyRate, 5)}/day · {Math.round(roi * 100)}%</p>
+                  <p className="text-[12px] text-on-card-soft tabular">{fmtPubg(s.dailyRate, 0)} PUBG/day</p>
                   <span className="pill pill--sm mt-3 w-full">{fmtGram(s.price)} GRAM</span>
                 </button>
               </GlassCard>

@@ -25,11 +25,11 @@ import { fmtGram } from "@/lib/game-rules";
 export const Route = createFileRoute("/101")({
   head: () => ({
     meta: [
-      { title: "Command center — DROPZONE" },
-      { name: "description", content: "DROPZONE admin command center." },
+      { title: "Command center — PUBG" },
+      { name: "description", content: "PUBG admin command center." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Command center — DROPZONE" },
-      { property: "og:description", content: "DROPZONE admin command center." },
+      { property: "og:title", content: "Command center — PUBG" },
+      { property: "og:description", content: "PUBG admin command center." },
     ],
   }),
   component: Admin,
@@ -111,12 +111,12 @@ function OwnerPanel({ tab }: { tab: Tab }) {
           <Stat v="speed" k="Players" n={s["players"]} sub={`+${s["new_today"]} today · ${s["active_today"]} active`} />
           <Stat v="context" k="Videos today" n={s["ads_today"]} sub={`${s["ads_total"]} all time`} />
           <Stat v="connections" k="Revenue today" n={s["revenue_today"]} dec sub={`${fmtGram(s["revenue_total"] ?? 0)} GRAM total · ${s["payers_today"]} payers`} />
-          <Stat v="speed" k="Pending payouts" n={s["withdraw_pending_amount"]} dec sub={`${s["withdraw_pending"]} requests · ${fmtGram(s["withdrawn_total"] ?? 0)} paid`} />
+          <Stat v="speed" k="Pending payouts" n={s["withdraw_pending"]} sub="requests waiting · see Withdrawals" />
         </div>
         <div className="glass grid grid-cols-2 gap-3 p-4 text-[13px]">
           <p>Bot subscribers: <b>{s["bot_users"]}</b></p>
           <p>Active servers: <b>{s["servers_active"]}</b></p>
-          <p>Player balances: <b>{fmtGram(s["balances_total"] ?? 0)}</b></p>
+          <p>Player PUBG: <b>{fmtGram(s["balances_total"] ?? 0, 0)}</b></p>
           <p>Bot: <b>{d.config.botUsername ? `@${d.config.botUsername}` : "not connected"}</b></p>
         </div>
         <div className="glass p-4">
@@ -147,7 +147,7 @@ function OwnerPanel({ tab }: { tab: Tab }) {
         {d.withdrawals.map((w) => (
           <div key={w.id} className="glass p-4">
             <div className="flex justify-between">
-              <p className="text-[15px] font-semibold tabular">{fmtGram(w.amount)} GRAM</p>
+              <p className="text-[15px] font-semibold tabular">{fmtGram(w.amount)} {w.currency}</p>
               <p className="text-[12px] text-copy">{new Date(w.created_at).toLocaleString()}</p>
             </div>
             <p className="text-[13px]">{w.player?.first_name} {w.player?.username ? `@${w.player.username}` : ""} · <code>{w.telegram_id}</code></p>
