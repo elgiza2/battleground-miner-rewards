@@ -10,6 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as R101RouteImport } from './routes/101'
+import { Route as MissionsRouteImport } from './routes/missions'
+import { Route as OperatorsRouteImport } from './routes/operators'
+import { Route as ServersRouteImport } from './routes/servers'
+import { Route as SquadRouteImport } from './routes/squad'
+import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as ApiPublicTonconnectManifestRouteImport } from './routes/api/public/tonconnect-manifest'
 import { Route as ApiPublicCronTickRouteImport } from './routes/api/public/cron/tick'
 import { Route as ApiPublicTelegramSetupRouteImport } from './routes/api/public/telegram/setup'
@@ -18,6 +24,36 @@ import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/publi
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R101Route = R101RouteImport.update({
+  id: '/101',
+  path: '/101',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MissionsRoute = MissionsRouteImport.update({
+  id: '/missions',
+  path: '/missions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OperatorsRoute = OperatorsRouteImport.update({
+  id: '/operators',
+  path: '/operators',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServersRoute = ServersRouteImport.update({
+  id: '/servers',
+  path: '/servers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SquadRoute = SquadRouteImport.update({
+  id: '/squad',
+  path: '/squad',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WalletRoute = WalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicTonconnectManifestRoute =
@@ -45,6 +81,12 @@ const ApiPublicTelegramWebhookRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/101': typeof R101Route
+  '/missions': typeof MissionsRoute
+  '/operators': typeof OperatorsRoute
+  '/servers': typeof ServersRoute
+  '/squad': typeof SquadRoute
+  '/wallet': typeof WalletRoute
   '/api/public/tonconnect-manifest': typeof ApiPublicTonconnectManifestRoute
   '/api/public/cron/tick': typeof ApiPublicCronTickRoute
   '/api/public/telegram/setup': typeof ApiPublicTelegramSetupRoute
@@ -52,6 +94,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/101': typeof R101Route
+  '/missions': typeof MissionsRoute
+  '/operators': typeof OperatorsRoute
+  '/servers': typeof ServersRoute
+  '/squad': typeof SquadRoute
+  '/wallet': typeof WalletRoute
   '/api/public/tonconnect-manifest': typeof ApiPublicTonconnectManifestRoute
   '/api/public/cron/tick': typeof ApiPublicCronTickRoute
   '/api/public/telegram/setup': typeof ApiPublicTelegramSetupRoute
@@ -60,6 +108,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/101': typeof R101Route
+  '/missions': typeof MissionsRoute
+  '/operators': typeof OperatorsRoute
+  '/servers': typeof ServersRoute
+  '/squad': typeof SquadRoute
+  '/wallet': typeof WalletRoute
   '/api/public/tonconnect-manifest': typeof ApiPublicTonconnectManifestRoute
   '/api/public/cron/tick': typeof ApiPublicCronTickRoute
   '/api/public/telegram/setup': typeof ApiPublicTelegramSetupRoute
@@ -69,6 +123,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/101'
+    | '/missions'
+    | '/operators'
+    | '/servers'
+    | '/squad'
+    | '/wallet'
     | '/api/public/tonconnect-manifest'
     | '/api/public/cron/tick'
     | '/api/public/telegram/setup'
@@ -76,6 +136,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/101'
+    | '/missions'
+    | '/operators'
+    | '/servers'
+    | '/squad'
+    | '/wallet'
     | '/api/public/tonconnect-manifest'
     | '/api/public/cron/tick'
     | '/api/public/telegram/setup'
@@ -83,6 +149,12 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/101'
+    | '/missions'
+    | '/operators'
+    | '/servers'
+    | '/squad'
+    | '/wallet'
     | '/api/public/tonconnect-manifest'
     | '/api/public/cron/tick'
     | '/api/public/telegram/setup'
@@ -91,6 +163,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  R101Route: typeof R101Route
+  MissionsRoute: typeof MissionsRoute
+  OperatorsRoute: typeof OperatorsRoute
+  ServersRoute: typeof ServersRoute
+  SquadRoute: typeof SquadRoute
+  WalletRoute: typeof WalletRoute
   ApiPublicTonconnectManifestRoute: typeof ApiPublicTonconnectManifestRoute
   ApiPublicCronTickRoute: typeof ApiPublicCronTickRoute
   ApiPublicTelegramSetupRoute: typeof ApiPublicTelegramSetupRoute
@@ -104,6 +182,48 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/101': {
+      id: '/101'
+      path: '/101'
+      fullPath: '/101'
+      preLoaderRoute: typeof R101RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/missions': {
+      id: '/missions'
+      path: '/missions'
+      fullPath: '/missions'
+      preLoaderRoute: typeof MissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/operators': {
+      id: '/operators'
+      path: '/operators'
+      fullPath: '/operators'
+      preLoaderRoute: typeof OperatorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/servers': {
+      id: '/servers'
+      path: '/servers'
+      fullPath: '/servers'
+      preLoaderRoute: typeof ServersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/squad': {
+      id: '/squad'
+      path: '/squad'
+      fullPath: '/squad'
+      preLoaderRoute: typeof SquadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wallet': {
+      id: '/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof WalletRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/tonconnect-manifest': {
@@ -139,6 +259,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  R101Route: R101Route,
+  MissionsRoute: MissionsRoute,
+  OperatorsRoute: OperatorsRoute,
+  ServersRoute: ServersRoute,
+  SquadRoute: SquadRoute,
+  WalletRoute: WalletRoute,
   ApiPublicTonconnectManifestRoute: ApiPublicTonconnectManifestRoute,
   ApiPublicCronTickRoute: ApiPublicCronTickRoute,
   ApiPublicTelegramSetupRoute: ApiPublicTelegramSetupRoute,

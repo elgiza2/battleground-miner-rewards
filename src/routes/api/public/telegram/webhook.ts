@@ -29,7 +29,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
   },
 });
 
-async function handle(u: Update) {
+async function handle(u: Update): Promise<unknown> {
   const T = await import("@/lib/telegram.server");
   const G = await import("@/lib/game.server");
   const J = await import("@/lib/jobs.server");
@@ -39,7 +39,7 @@ async function handle(u: Update) {
   if (u.my_chat_member && u.my_chat_member.chat.type === "private") {
     const blocked = ["kicked", "left"].includes(u.my_chat_member.new_chat_member.status);
     await db.from("bg_players").update({ bot_blocked: blocked }).eq("telegram_id", u.my_chat_member.chat.id);
-    return;
+    return null;
   }
 
   if (u.callback_query) {
@@ -50,7 +50,7 @@ async function handle(u: Update) {
     if (!gift || new Date(gift.expires_at).getTime() < Date.now()) {
       return T.tg("answerCallbackQuery", { callback_query_id: q.id, text: "This gift has expired. Watch for the next drop!", show_alert: true });
     }
-    await G.ensurePlayer({ id: q.from.id, first_name: q.from.first_name, username: q.from.username }, null, { fromBot: true });
+    await G.ensurePlayer({ id: q.from.id, ...(q.from.first_name ? { first_name: q.from.first_name } : {}), ...(q.from.username ? { username: q.from.username } : {}) }, null, { fromBot: true });
     const { error } = await db.from("bg_gift_claims").insert({ gift_id: gift.id, telegram_id: q.from.id });
     if (error) return T.tg("answerCallbackQuery", { callback_query_id: q.id, text: "Already claimed ✅", show_alert: false });
     await db.rpc("bg_credit", { _tid: q.from.id, _amount: Number(gift.amount), _reason: "gift", _meta: { gift: gift.id } });
@@ -65,11 +65,11 @@ async function handle(u: Update) {
         ]),
       });
     }
-    return;
+    return null;
   }
 
   const msg = u.message;
-  if (!msg?.from || msg.chat.type !== "private") return;
+  if (!msg?.from || msg.chat.type !== "private") return null;
   const text = (msg.text ?? "").trim();
   if (text.startsWith("/start")) {
     const payload = text.split(/\s+/)[1] ?? null;
@@ -92,10 +92,10 @@ async function handle(u: Update) {
     const banner = origin ? `${origin}${(await import("@/assets/art/start-banner.jpg.asset.json")).default.url}` : null;
     if (banner) {
       const r = await T.tg("sendPhoto", { chat_id: msg.chat.id, photo: banner, caption, parse_mode: "HTML", reply_markup: T.kb(rows) });
-      if (r.ok) return;
+      if (r.ok) return null;
     }
     await T.tg("sendMessage", { chat_id: msg.chat.id, text: caption, parse_mode: "HTML", reply_markup: T.kb(rows) });
-    return;
+    return null;
   }
   if (text === "/101") {
     const role = await G.adminRole(msg.from);
@@ -107,7 +107,7 @@ async function handle(u: Update) {
         reply_markup: T.kb([[{ text: "OPEN ADMIN PANEL", web_app: { url: `${origin}/101` }, style: "danger" }]]),
       });
     }
-    return;
+    return null;
   }
   if (origin) {
     await T.tg("sendMessage", {
@@ -117,4 +117,5 @@ async function handle(u: Update) {
       reply_markup: T.kb([[{ text: "▶  PLAY DROPZONE", web_app: { url: origin }, style: "success" }]]),
     });
   }
+  return null;
 }

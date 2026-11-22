@@ -79,7 +79,7 @@ export async function tgSendPhotoBytes(
   form.append("caption", caption);
   form.append("parse_mode", "HTML");
   form.append("reply_markup", JSON.stringify(replyMarkup));
-  form.append("photo", new Blob([bytes], { type: "image/jpeg" }), "drop.jpg");
+  form.append("photo", new Blob([new Uint8Array(bytes)], { type: "image/jpeg" }), "drop.jpg");
   const res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: "POST", body: form });
   return (await res.json().catch(() => ({ ok: false }))) as TgResult<{ message_id: number }>;
 }

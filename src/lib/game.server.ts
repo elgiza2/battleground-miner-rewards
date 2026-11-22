@@ -90,16 +90,13 @@ export async function ensurePlayer(user: TgUser, startParam: string | null, opts
     }
     p = await loadPlayer(user.id);
   } else {
-    const patch: Record<string, unknown> = {
+    const patch = {
       username: user.username ?? p.username,
       first_name: user.first_name ?? p.first_name,
       photo_url: user.photo_url ?? p.photo_url,
       last_seen_at: new Date().toISOString(),
+      ...(opts.fromBot ? { started_bot: true, bot_blocked: false } : {}),
     };
-    if (opts.fromBot) {
-      patch["started_bot"] = true;
-      patch["bot_blocked"] = false;
-    }
     await db.from("bg_players").update(patch).eq("telegram_id", user.id);
   }
   if (user.username) {

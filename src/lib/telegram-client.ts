@@ -35,9 +35,11 @@ export function initTelegram() {
       app.requestFullscreen?.();
     }
     if (app.isVersionAtLeast?.("7.7")) app.disableVerticalSwipes?.();
-    app.setHeaderColor?.("#ececeb");
-    app.setBackgroundColor?.("#ececeb");
-    app.setBottomBarColor?.("#ececeb");
+    if (app.isVersionAtLeast?.("6.1")) {
+      app.setHeaderColor?.("#ececeb");
+      app.setBackgroundColor?.("#ececeb");
+    }
+    if (app.isVersionAtLeast?.("7.10")) app.setBottomBarColor?.("#ececeb");
   } catch {
     /* older clients */
   }

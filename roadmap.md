@@ -15,3 +15,7 @@
 - [ ] Daily notifications (several per day to all users) + daily gifts
 - [ ] Auto news posts 2–3/day (AI image + text + open-app button)
 - [ ] BLOCKED: bot token (user will send), community channel username (user will send)
+- [ ] Mined currency = user's own jetton (EQBmR1S2…dbG from STON.fi link), not GRAM; payments/fees stay in GRAM
+- [ ] Ads via Monetag SDK (libtl.com, zone 12323205, show_12323205) instead of Adsgram
+- [ ] Show live PUBG price; swap PUBG → GRAM inside the app
+- [ ] GRAM withdrawals with minimum 0.5 GRAM (PUBG withdrawals stay too)
