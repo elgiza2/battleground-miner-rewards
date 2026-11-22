@@ -125,6 +125,652 @@ export type Database = {
           },
         ]
       }
+      bg_ad_daily: {
+        Row: {
+          count: number
+          day: string
+          telegram_id: number
+        }
+        Insert: {
+          count?: number
+          day: string
+          telegram_id: number
+        }
+        Update: {
+          count?: number
+          day?: string
+          telegram_id?: number
+        }
+        Relationships: []
+      }
+      bg_admins: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          role: string
+          telegram_id: number | null
+          username: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          role: string
+          telegram_id?: number | null
+          username: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          role?: string
+          telegram_id?: number | null
+          username?: string
+        }
+        Relationships: []
+      }
+      bg_config: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      bg_gift_claims: {
+        Row: {
+          claimed_at: string
+          gift_id: string
+          telegram_id: number
+        }
+        Insert: {
+          claimed_at?: string
+          gift_id: string
+          telegram_id: number
+        }
+        Update: {
+          claimed_at?: string
+          gift_id?: string
+          telegram_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bg_gift_claims_gift_id_fkey"
+            columns: ["gift_id"]
+            isOneToOne: false
+            referencedRelation: "bg_gifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bg_gifts: {
+        Row: {
+          amount: number
+          created_at: string
+          expires_at: string
+          id: string
+          title: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          title: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      bg_jobs: {
+        Row: {
+          cursor: number
+          done: boolean
+          key: string
+          sent: number
+          updated_at: string
+        }
+        Insert: {
+          cursor?: number
+          done?: boolean
+          key: string
+          sent?: number
+          updated_at?: string
+        }
+        Update: {
+          cursor?: number
+          done?: boolean
+          key?: string
+          sent?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bg_ledger: {
+        Row: {
+          amount: number
+          created_at: string
+          id: number
+          meta: Json | null
+          reason: string
+          telegram_id: number
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: number
+          meta?: Json | null
+          reason: string
+          telegram_id: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: number
+          meta?: Json | null
+          reason?: string
+          telegram_id?: number
+        }
+        Relationships: []
+      }
+      bg_operators: {
+        Row: {
+          boost_pct: number
+          id: string
+          image: string
+          name: string
+          price: number
+          rarity: string
+          sort: number
+          unlock_ads: number
+        }
+        Insert: {
+          boost_pct: number
+          id: string
+          image: string
+          name: string
+          price?: number
+          rarity: string
+          sort?: number
+          unlock_ads?: number
+        }
+        Update: {
+          boost_pct?: number
+          id?: string
+          image?: string
+          name?: string
+          price?: number
+          rarity?: string
+          sort?: number
+          unlock_ads?: number
+        }
+        Relationships: []
+      }
+      bg_owned_operators: {
+        Row: {
+          acquired_at: string
+          operator_id: string
+          telegram_id: number
+        }
+        Insert: {
+          acquired_at?: string
+          operator_id: string
+          telegram_id: number
+        }
+        Update: {
+          acquired_at?: string
+          operator_id?: string
+          telegram_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bg_owned_operators_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "bg_operators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bg_owned_operators_telegram_id_fkey"
+            columns: ["telegram_id"]
+            isOneToOne: false
+            referencedRelation: "bg_players"
+            referencedColumns: ["telegram_id"]
+          },
+        ]
+      }
+      bg_owned_servers: {
+        Row: {
+          acquired_at: string
+          expires_at: string
+          id: string
+          server_id: number
+          source: string
+          telegram_id: number
+        }
+        Insert: {
+          acquired_at?: string
+          expires_at: string
+          id?: string
+          server_id: number
+          source: string
+          telegram_id: number
+        }
+        Update: {
+          acquired_at?: string
+          expires_at?: string
+          id?: string
+          server_id?: number
+          source?: string
+          telegram_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bg_owned_servers_server_id_fkey"
+            columns: ["server_id"]
+            isOneToOne: false
+            referencedRelation: "bg_servers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bg_owned_servers_telegram_id_fkey"
+            columns: ["telegram_id"]
+            isOneToOne: false
+            referencedRelation: "bg_players"
+            referencedColumns: ["telegram_id"]
+          },
+        ]
+      }
+      bg_payments: {
+        Row: {
+          amount_nano: number
+          confirmed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          memo: string
+          purpose: string
+          ref: string | null
+          sender: string | null
+          status: string
+          telegram_id: number
+          tx_hash: string | null
+        }
+        Insert: {
+          amount_nano: number
+          confirmed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          memo: string
+          purpose: string
+          ref?: string | null
+          sender?: string | null
+          status?: string
+          telegram_id: number
+          tx_hash?: string | null
+        }
+        Update: {
+          amount_nano?: number
+          confirmed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          memo?: string
+          purpose?: string
+          ref?: string | null
+          sender?: string | null
+          status?: string
+          telegram_id?: number
+          tx_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bg_payments_telegram_id_fkey"
+            columns: ["telegram_id"]
+            isOneToOne: false
+            referencedRelation: "bg_players"
+            referencedColumns: ["telegram_id"]
+          },
+        ]
+      }
+      bg_players: {
+        Row: {
+          ad_last_at: string | null
+          ads_day: string | null
+          ads_today: number
+          ads_total: number
+          balance: number
+          boost_until: string | null
+          bot_blocked: boolean
+          created_at: string
+          first_name: string | null
+          is_premium: boolean
+          joined_channel: boolean
+          language_code: string | null
+          last_checkin: string | null
+          last_claim_at: string
+          last_name: string | null
+          last_seen_at: string | null
+          operator_id: string
+          photo_url: string | null
+          ref_count: number
+          referrer_id: number | null
+          referrer2_id: number | null
+          started_bot: boolean
+          streak: number
+          telegram_id: number
+          total_mined: number
+          total_ref_earned: number
+          total_spent: number
+          updated_at: string
+          username: string | null
+          wallet_address: string | null
+        }
+        Insert: {
+          ad_last_at?: string | null
+          ads_day?: string | null
+          ads_today?: number
+          ads_total?: number
+          balance?: number
+          boost_until?: string | null
+          bot_blocked?: boolean
+          created_at?: string
+          first_name?: string | null
+          is_premium?: boolean
+          joined_channel?: boolean
+          language_code?: string | null
+          last_checkin?: string | null
+          last_claim_at?: string
+          last_name?: string | null
+          last_seen_at?: string | null
+          operator_id?: string
+          photo_url?: string | null
+          ref_count?: number
+          referrer_id?: number | null
+          referrer2_id?: number | null
+          started_bot?: boolean
+          streak?: number
+          telegram_id: number
+          total_mined?: number
+          total_ref_earned?: number
+          total_spent?: number
+          updated_at?: string
+          username?: string | null
+          wallet_address?: string | null
+        }
+        Update: {
+          ad_last_at?: string | null
+          ads_day?: string | null
+          ads_today?: number
+          ads_total?: number
+          balance?: number
+          boost_until?: string | null
+          bot_blocked?: boolean
+          created_at?: string
+          first_name?: string | null
+          is_premium?: boolean
+          joined_channel?: boolean
+          language_code?: string | null
+          last_checkin?: string | null
+          last_claim_at?: string
+          last_name?: string | null
+          last_seen_at?: string | null
+          operator_id?: string
+          photo_url?: string | null
+          ref_count?: number
+          referrer_id?: number | null
+          referrer2_id?: number | null
+          started_bot?: boolean
+          streak?: number
+          telegram_id?: number
+          total_mined?: number
+          total_ref_earned?: number
+          total_spent?: number
+          updated_at?: string
+          username?: string | null
+          wallet_address?: string | null
+        }
+        Relationships: []
+      }
+      bg_posts: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          message_id: number | null
+          slot: string
+          status: string
+          text: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          message_id?: number | null
+          slot: string
+          status?: string
+          text?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          message_id?: number | null
+          slot?: string
+          status?: string
+          text?: string | null
+        }
+        Relationships: []
+      }
+      bg_servers: {
+        Row: {
+          active: boolean
+          daily_rate: number
+          duration_days: number
+          id: number
+          image: string
+          level: number
+          name: string
+          price: number
+          rarity: string
+          slug: string
+          sort: number
+          tier: number
+          unlock: string
+          unlock_goal: number
+        }
+        Insert: {
+          active?: boolean
+          daily_rate: number
+          duration_days: number
+          id: number
+          image: string
+          level: number
+          name: string
+          price?: number
+          rarity: string
+          slug: string
+          sort?: number
+          tier: number
+          unlock: string
+          unlock_goal?: number
+        }
+        Update: {
+          active?: boolean
+          daily_rate?: number
+          duration_days?: number
+          id?: number
+          image?: string
+          level?: number
+          name?: string
+          price?: number
+          rarity?: string
+          slug?: string
+          sort?: number
+          tier?: number
+          unlock?: string
+          unlock_goal?: number
+        }
+        Relationships: []
+      }
+      bg_task_claims: {
+        Row: {
+          claimed_at: string
+          period: string
+          task_id: string
+          telegram_id: number
+        }
+        Insert: {
+          claimed_at?: string
+          period: string
+          task_id: string
+          telegram_id: number
+        }
+        Update: {
+          claimed_at?: string
+          period?: string
+          task_id?: string
+          telegram_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bg_task_claims_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "bg_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bg_task_claims_telegram_id_fkey"
+            columns: ["telegram_id"]
+            isOneToOne: false
+            referencedRelation: "bg_players"
+            referencedColumns: ["telegram_id"]
+          },
+        ]
+      }
+      bg_tasks: {
+        Row: {
+          active: boolean
+          chat_username: string | null
+          created_at: string
+          created_by: number | null
+          description: string | null
+          goal: number
+          icon: string
+          id: string
+          kind: string
+          repeat: string
+          reward: number
+          sort: number
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          active?: boolean
+          chat_username?: string | null
+          created_at?: string
+          created_by?: number | null
+          description?: string | null
+          goal?: number
+          icon?: string
+          id?: string
+          kind: string
+          repeat?: string
+          reward?: number
+          sort?: number
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          active?: boolean
+          chat_username?: string | null
+          created_at?: string
+          created_by?: number | null
+          description?: string | null
+          goal?: number
+          icon?: string
+          id?: string
+          kind?: string
+          repeat?: string
+          reward?: number
+          sort?: number
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      bg_withdrawals: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          created_at: string
+          fee_payment_id: string | null
+          id: string
+          processed_at: string | null
+          processed_by: number | null
+          status: string
+          telegram_id: number
+          wallet: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: number
+          created_at?: string
+          fee_payment_id?: string | null
+          id?: string
+          processed_at?: string | null
+          processed_by?: number | null
+          status?: string
+          telegram_id: number
+          wallet: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          created_at?: string
+          fee_payment_id?: string | null
+          id?: string
+          processed_at?: string | null
+          processed_by?: number | null
+          status?: string
+          telegram_id?: number
+          wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bg_withdrawals_fee_payment_id_fkey"
+            columns: ["fee_payment_id"]
+            isOneToOne: false
+            referencedRelation: "bg_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bg_withdrawals_telegram_id_fkey"
+            columns: ["telegram_id"]
+            isOneToOne: false
+            referencedRelation: "bg_players"
+            referencedColumns: ["telegram_id"]
+          },
+        ]
+      }
       billing_events: {
         Row: {
           amount: number | null
@@ -2154,6 +2800,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bg_claim: { Args: { _bonus?: number; _tid: number }; Returns: number }
+      bg_credit: {
+        Args: { _amount: number; _meta?: Json; _reason: string; _tid: number }
+        Returns: number
+      }
+      bg_pending: {
+        Args: { _cap_hours?: number; _tid: number }
+        Returns: number
+      }
+      bg_record_ad: {
+        Args: {
+          _boost_minutes: number
+          _daily_cap: number
+          _min_gap_seconds: number
+          _reward: number
+          _tid: number
+        }
+        Returns: Json
+      }
       consume_ai_action: { Args: { p_kind?: string }; Returns: Json }
       provision_user: {
         Args: { _email: string; _name: string; _uid: string }
