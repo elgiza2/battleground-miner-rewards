@@ -139,7 +139,7 @@ function RootComponent() {
         <Outlet />
         {!isAdmin && <Dock />}
       </main>
-      <Toaster position="top-center" toastOptions={{ className: "glass" }} />
+      <Toaster position="bottom-center" offset={104} mobileOffset={{ bottom: 104 }} toastOptions={{ className: "glass toast-glass" }} />
     </QueryClientProvider>
   );
 }

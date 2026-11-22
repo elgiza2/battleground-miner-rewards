@@ -30,6 +30,10 @@ export const RULES = {
   giftAmount: 10, // PUBG
   swapFee: 0.05,
   swapMinPubg: 1000,
+  activationPrice: 0.1, // GRAM, required before any mining or free server
+  freeMiningPerDay: 10, // PUBG, no server needed
+  contestPool: 100000, // PUBG per day, top 10 inviters
+  contestShares: [25, 15, 12, 10, 8, 7, 6, 6, 6, 5],
 } as const;
 
 export type Currency = "PUBG" | "GRAM";

@@ -171,6 +171,7 @@ export async function runTick(budgetMs = 22_000) {
     } else await ensureJob(key, { type: "notify" });
   }
   const paid = await reconcilePendingPayments().catch(() => 0);
+  await settleContest().catch(() => 0);
   for (const slot of posts) {
     const { data } = await db.from("bg_posts").select("id").eq("slot", slot).maybeSingle();
     if (!data) await generatePost(slot);
@@ -182,4 +183,16 @@ export async function runTick(budgetMs = 22_000) {
     sent += await processJob(j.key, deadline);
   }
   return { sent, paid, open: (open ?? []).length };
+}
+
+/** Pays yesterday's daily referral contest once (idempotent in the database) and tells the winners. */
+async function settleContest() {
+  const day = new Date(Date.now() - 86400_000).toISOString().slice(0, 10);
+  const { data: count } = await db.rpc("bg_settle_daily_contest", { _day: day });
+  if (!count) return 0;
+  const { data: rows } = await db.from("bg_contest_payouts").select("telegram_id, rank, prize, invites").eq("day", day);
+  for (const r of rows ?? []) {
+    await tg("sendMessage", { chat_id: r.telegram_id, parse_mode: "HTML", text: `<b>🏆 You placed #${r.rank} in the daily invite contest!</b>\n\n${r.invites} invites · <b>+${Number(r.prize).toLocaleString("en-US")} PUBG</b> added to your balance.` }).catch(() => null);
+  }
+  return Number(count);
 }

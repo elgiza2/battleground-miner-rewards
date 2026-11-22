@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Copy, Crown, Send } from "lucide-react";
 import { useSquad, useGameState } from "@/hooks/use-game";
@@ -95,9 +96,17 @@ function Squad() {
             </GlassCard>
 
             <section className="mt-7">
-              <h2 className="mb-3 text-[17px] font-semibold tracking-tight">This week’s top recruiters</h2>
+              <div className="mb-3 flex items-end justify-between gap-3">
+                <div>
+                  <h2 className="text-[17px] font-semibold tracking-tight">Daily invite contest</h2>
+                  <p className="text-[12.5px] text-copy">
+                    Top 10 share <b className="text-foreground tabular">{fmtPubg(d.contest.pool, 0)} PUBG</b> every day
+                  </p>
+                </div>
+                <ContestClock endsAt={d.contest.endsAt} />
+              </div>
               <div className="glass divide-y divide-border/60">
-                {d.top.length === 0 && <p className="p-4 text-[13px] text-copy">No recruits yet this week — be the first on the board.</p>}
+                {d.top.length === 0 && <p className="p-4 text-[13px] text-copy">No invites yet today — be the first on the board.</p>}
                 {d.top.map((t, i) => (
                   <div key={i} className="flex items-center gap-3 px-4 py-3">
                     <span className="w-6 text-[13px] font-semibold text-copy tabular">{i + 1}</span>
@@ -106,11 +115,27 @@ function Squad() {
                       {t.name}
                       {t.me ? " (you)" : ""}
                     </span>
-                    <span className="text-[13px] font-semibold tabular">{t.invites}</span>
+                    <span className="text-[12px] text-copy tabular">{t.invites} inv</span>
+                    <span className="w-[86px] text-right text-[13px] font-semibold tabular">+{fmtPubg(t.prize, 0)}</span>
                   </div>
                 ))}
               </div>
             </section>
+
+            {d.winners.length > 0 && (
+              <section className="mt-5">
+                <h3 className="mb-2 text-[13px] font-semibold text-copy">Yesterday’s winners</h3>
+                <div className="glass divide-y divide-border/60">
+                  {d.winners.map((w) => (
+                    <div key={w.rank} className="flex items-center gap-3 px-4 py-2.5 text-[13px]">
+                      <span className="w-6 font-semibold text-copy tabular">{w.rank}</span>
+                      <span className="flex-1 truncate">{w.name}</span>
+                      <span className="font-semibold tabular">+{fmtPubg(w.prize, 0)}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             <section className="mt-7">
               <h2 className="mb-3 text-[17px] font-semibold tracking-tight">Your recruits</h2>
@@ -129,5 +154,22 @@ function Squad() {
         )}
       </StateGate>
     </div>
+  );
+}
+
+function ContestClock({ endsAt }: { endsAt: string }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const left = Math.max(0, new Date(endsAt).getTime() - now);
+  const h = Math.floor(left / 3600000);
+  const m = Math.floor((left % 3600000) / 60000);
+  const sec = Math.floor((left % 60000) / 1000);
+  return (
+    <span className="chip tabular" suppressHydrationWarning>
+      {String(h).padStart(2, "0")}:{String(m).padStart(2, "0")}:{String(sec).padStart(2, "0")}
+    </span>
   );
 }

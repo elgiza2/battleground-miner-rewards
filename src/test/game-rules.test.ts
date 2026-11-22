@@ -42,3 +42,12 @@ describe("swap and payments", () => {
     expect(toNano(0.05)).toBe(50_000_000n);
   });
 });
+
+describe("activation and daily contest", () => {
+  it("activation costs 0.1 GRAM", () => expect(RULES.activationPrice).toBe(0.1));
+  it("daily contest pays 100,000 PUBG to exactly 10 places", () => {
+    expect(RULES.contestPool).toBe(100000);
+    expect(RULES.contestShares).toHaveLength(10);
+    expect(RULES.contestShares.reduce((a, b) => a + b, 0)).toBe(100);
+  });
+});

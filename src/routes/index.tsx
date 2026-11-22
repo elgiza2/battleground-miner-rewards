@@ -133,7 +133,13 @@ function Base() {
                   </div>
                 </div>
                 <p className="mt-[2%] text-center" style={{ fontSize: "calc(18 * var(--u))", color: "var(--on-card-soft)" }}>
-                  {s.mining.activeCount > 0 ? (
+                  {!s.me.activated ? (
+                    <>
+                      Mining is locked
+                      <br />
+                      Activate once for {RULES.activationPrice} GRAM to start
+                    </>
+                  ) : s.mining.activeCount > 0 ? (
                     <>
                       PUBG in backpack · {Math.round(live.fill * 100)}% full
                       <br />
@@ -141,14 +147,31 @@ function Base() {
                     </>
                   ) : (
                     <>
-                      No server running
+                      Free mining · {fmtPubg(s.mining.ratePerDay)} PUBG / day
                       <br />
-                      Deploy one in the Armory
+                      Deploy a server to mine faster
                     </>
                   )}
                 </p>
                 <div className="mt-auto flex gap-2 pt-4">
-                  {s.mining.activeCount > 0 ? (
+                  {!s.me.activated ? (
+                    <button
+                      className="pill flex-1"
+                      onClick={() =>
+                        setPay({
+                          title: "Activate mining",
+                          subtitle: `Unlocks free mining and free servers · ${RULES.activationPrice} GRAM one time`,
+                          price: RULES.activationPrice,
+                          purpose: "activation",
+                          ref: "activation",
+                          allowBalance: false,
+                        })
+                      }
+                    >
+                      <Zap className="h-4 w-4" />
+                      Activate · {RULES.activationPrice} GRAM
+                    </button>
+                  ) : live.pending > 0 || s.mining.activeCount > 0 ? (
                     <>
                       <button className="pill flex-1" disabled={!!claiming || live.pending <= 0} onClick={() => claim(false)}>
                         {claiming === "x1" && <Loader2 className="h-4 w-4 animate-spin" />}

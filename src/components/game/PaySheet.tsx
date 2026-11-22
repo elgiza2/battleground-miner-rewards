@@ -13,7 +13,7 @@ export type PayItem = {
   subtitle?: string;
   image?: string;
   price: number;
-  purpose: "server" | "operator" | "boost";
+  purpose: "server" | "operator" | "boost" | "activation";
   ref: string;
   allowBalance: boolean;
 };
@@ -55,7 +55,7 @@ export function PaySheet({ item, balance, onClose }: { item: PayItem | null; bal
   };
 
   const payBalance = async () => {
-    if (!item || item.purpose === "boost") return;
+    if (!item || item.purpose === "boost" || item.purpose === "activation") return;
     setBusy("balance");
     try {
       await buyWithBalanceFn({ data: { ...auth(), kind: item.purpose, ref: item.ref } });

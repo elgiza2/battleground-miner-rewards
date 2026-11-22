@@ -234,6 +234,7 @@ export async function getState(initData: string) {
       photo: p.photo_url,
       balance: n(p.balance),
       gram: n(p.gram_balance),
+      activated: p.activated,
       totalMined: n(p.total_mined),
       refCount: p.ref_count,
       refEarned: n(p.total_ref_earned),
@@ -253,7 +254,8 @@ export async function getState(initData: string) {
     mining: {
       pending: n(pendingRes.data),
       baseRate,
-      ratePerDay: baseRate * mult,
+      ratePerDay: p.activated ? (baseRate + RULES.freeMiningPerDay) * mult : 0,
+      freePerDay: RULES.freeMiningPerDay,
       multiplier: mult,
       boosted,
       capHours: RULES.storageHours,
@@ -277,6 +279,7 @@ export async function claimMining(initData: string, double: boolean) {
     const adAt = p.ad_last_at ? new Date(p.ad_last_at).getTime() : 0;
     if (Date.now() - adAt < 120_000 && adAt > new Date(p.last_claim_at).getTime()) bonus = 2;
   }
+  if (!p.activated) fail(`Activate mining first (${RULES.activationPrice} GRAM)`);
   const { data, error } = await db.rpc("bg_claim", { _tid: p.telegram_id, _bonus: bonus });
   if (error) throw error;
   return { amount: n(data), doubled: bonus === 2 };
@@ -375,8 +378,9 @@ export async function buyWithBalance(initData: string, kind: "server" | "operato
   return { ok: true, name };
 }
 
-async function itemPrice(kind: "server" | "operator" | "boost", ref: string) {
+async function itemPrice(kind: "server" | "operator" | "boost" | "activation", ref: string) {
   if (kind === "boost") return RULES.battlePassPrice;
+  if (kind === "activation") return RULES.activationPrice;
   if (kind === "server") {
     const { data } = await db.from("bg_servers").select("price,unlock,active").eq("id", Number(ref)).maybeSingle();
     if (!data || data.unlock !== "gram" || !data.active) fail("This server can't be bought");
@@ -387,8 +391,12 @@ async function itemPrice(kind: "server" | "operator" | "boost", ref: string) {
   return n(data!.price);
 }
 
-async function fulfillItem(p: NonNullable<Player>, kind: "server" | "operator" | "boost", ref: string) {
+async function fulfillItem(p: NonNullable<Player>, kind: "server" | "operator" | "boost" | "activation", ref: string) {
   if (kind === "server") return grantServer(p.telegram_id, Number(ref), "gram");
+  if (kind === "activation") {
+    await db.from("bg_players").update({ activated: true, last_claim_at: new Date().toISOString() }).eq("telegram_id", p.telegram_id);
+    return "Activation";
+  }
   if (kind === "operator") {
     await db.from("bg_owned_operators").upsert({ telegram_id: p.telegram_id, operator_id: ref });
     await db.from("bg_players").update({ operator_id: ref }).eq("telegram_id", p.telegram_id);
@@ -401,6 +409,7 @@ async function fulfillItem(p: NonNullable<Player>, kind: "server" | "operator" |
 
 export async function claimFreeServer(initData: string, kind: "ads" | "squad") {
   const { player: p } = await authPlayer(initData);
+  if (!p.activated) fail(`Activate mining first (${RULES.activationPrice} GRAM)`);
   const servers = await ownedServers(p.telegram_id);
   if (kind === "ads") {
     const claims = servers.filter((s) => s.source === "ads").length;
@@ -428,13 +437,13 @@ export async function equipOperator(initData: string, id: string) {
 
 // ---------- payments ----------
 
-export async function createPayment(initData: string, purpose: "server" | "operator" | "boost", ref: string) {
+export async function createPayment(initData: string, purpose: "server" | "operator" | "boost" | "activation", ref: string) {
   const { player: p } = await authPlayer(initData);
   const price = await itemPrice(purpose, ref);
   return insertPayment(p.telegram_id, purpose, ref, price);
 }
 
-async function insertPayment(tid: number, purpose: "server" | "operator" | "boost" | "withdraw_fee", ref: string, amount: number) {
+async function insertPayment(tid: number, purpose: "server" | "operator" | "boost" | "activation" | "withdraw_fee", ref: string, amount: number) {
   const memo = `dz:${crypto.randomUUID()}`;
   const amountNano = toNano(amount);
   const { data, error } = await db
@@ -521,7 +530,7 @@ async function reconcileOne(pay: PaymentRow, txs: TonTx[]) {
       );
     }
   } else {
-    const name = await fulfillItem(player, pay.purpose as "server" | "operator" | "boost", pay.ref ?? "");
+    const name = await fulfillItem(player, pay.purpose as "server" | "operator" | "boost" | "activation", pay.ref ?? "");
     label = `${pay.purpose}: ${name}`;
     await db.from("bg_players").update({ total_spent: n(player.total_spent) + amount }).eq("telegram_id", player.telegram_id);
     await payUplineForPurchase(player, amount);
@@ -636,25 +645,32 @@ export async function claimTask(initData: string, taskId: string) {
 
 export async function getSquad(initData: string) {
   const { player: p } = await authPlayer(initData);
-  const weekStart = new Date();
-  weekStart.setUTCHours(0, 0, 0, 0);
-  weekStart.setUTCDate(weekStart.getUTCDate() - ((weekStart.getUTCDay() + 6) % 7));
-  const [{ data: refs }, { data: top }, cfg] = await Promise.all([
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const yest = new Date(Date.now() - 86400_000).toISOString().slice(0, 10);
+  const [{ data: refs }, { data: top }, cfg, { data: winners }] = await Promise.all([
     db.from("bg_players").select("first_name, username, total_mined, total_spent, created_at").eq("referrer_id", p.telegram_id).order("created_at", { ascending: false }).limit(100),
-    db.rpc("bg_top_inviters", { _since: weekStart.toISOString(), _limit: 10 }),
+    db.rpc("bg_daily_ranks", { _day: todayStr, _limit: 10 }),
     getConfig(),
+    db.from("bg_contest_payouts").select("rank, prize, invites, bg_players(first_name, username)").eq("day", yest).order("rank"),
   ]);
+  const ends = new Date(todayStr + "T00:00:00Z").getTime() + 86400_000;
   const link = cfg.botUsername ? `https://t.me/${cfg.botUsername}?startapp=r${p.telegram_id}` : null;
   return {
     link,
     refCount: p.ref_count,
     refEarned: n(p.total_ref_earned),
     recruits: (refs ?? []).map((r) => ({ name: r.first_name ?? r.username ?? "Recruit", mined: n(r.total_mined), spent: n(r.total_spent), joinedAt: r.created_at })),
-    top: (top ?? []).map((t: { first_name: string | null; username: string | null; invites: number; telegram_id: number }) => ({
+    contest: { pool: RULES.contestPool, shares: RULES.contestShares, endsAt: new Date(ends).toISOString() },
+    top: (top ?? []).map((t: { first_name: string | null; username: string | null; invites: number; telegram_id: number; rank: number }) => ({
       name: t.first_name ?? t.username ?? "Soldier",
       invites: Number(t.invites),
+      prize: (RULES.contestPool * (RULES.contestShares[Number(t.rank) - 1] ?? 0)) / 100,
       me: Number(t.telegram_id) === p.telegram_id,
     })),
+    winners: (winners ?? []).map((w) => {
+      const pl = w.bg_players as unknown as { first_name: string | null; username: string | null } | null;
+      return { rank: w.rank, prize: n(w.prize), invites: w.invites, name: pl?.first_name ?? pl?.username ?? "Soldier" };
+    }),
   };
 }
 

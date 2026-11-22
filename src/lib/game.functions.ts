@@ -38,7 +38,7 @@ export const buyWithBalanceFn = createServerFn({ method: "POST" })
   .handler(({ data }) => G.buyWithBalance(data.initData, data.kind, data.ref));
 
 export const createPaymentFn = createServerFn({ method: "POST" })
-  .inputValidator(v({ purpose: z.enum(["server", "operator", "boost"]), ref: z.string().max(40) }))
+  .inputValidator(v({ purpose: z.enum(["server", "operator", "boost", "activation"]), ref: z.string().max(40) }))
   .handler(({ data }) => G.createPayment(data.initData, data.purpose, data.ref));
 
 export const verifyPaymentFn = createServerFn({ method: "POST" })

@@ -1,28 +1,28 @@
 # DROPZONE roadmap
 
-- [ ] Design system: follow user-pasted "Intelligent Performance" look (paper #ececeb, Inter, gradient glass cards 429x554, LED dot numbers, grain, CloudFront bg videos) + generated art
-- [ ] Database (bg_* tables only; this backend is shared with other apps — never touch non-bg tables)
-- [ ] Telegram identity (initData verification) + full-screen mini app setup
-- [ ] Mining game home (match/drop, airdrop crates via ads, ad boosts)
-- [ ] 90 servers page (1 free via 300 ads, 1 free via 50 referrals, rest paid in GRAM/TON)
-- [ ] Missions page (many ad + referral tasks, daily ad ladder up to 1000)
-- [ ] Squad / referrals (multi-level commissions, milestones)
-- [ ] Operators (characters with boosts)
-- [ ] Withdraw page (min 1, fee 0.05, join community, 1 referral OR 25 ads)
-- [ ] TON Connect payments to treasury + verification + admin payment alerts
-- [ ] Admin /101 (owners @eigiza @torker: stats, payments, withdrawals, tasks, task-managers who only see tasks)
-- [ ] Bot: bold /start with colored buttons, gift messages with claim button
-- [ ] Daily notifications (several per day to all users) + daily gifts
-- [ ] Auto news posts 2–3/day (AI image + text + open-app button)
-- [ ] BLOCKED: bot token (user will send), community channel username (user will send)
-- [ ] Mined currency = user's own jetton (EQBmR1S2…dbG from STON.fi link), not GRAM; payments/fees stay in GRAM
-- [ ] Ads via Monetag SDK (libtl.com, zone 12323205, show_12323205) instead of Adsgram
-- [ ] Show live PUBG price; swap PUBG → GRAM inside the app
-- [ ] GRAM withdrawals with minimum 0.5 GRAM (PUBG withdrawals stay too)
-- [ ] Rename app to PUBG (same as the coin) everywhere: UI, titles, bot texts, manifest
-- [ ] Redraw every image and icon (servers, operators, crate, logo, nav icons) in the exact glass-card site style
-- [ ] Free base mining for everyone without a server (small rate)
-- [ ] Better bottom navigation with clean transition animation between pages
-- [ ] Move notifications (toasts) off the top and position them properly
-- [ ] Daily referral contest; prize split among top 10 inviters
-- [ ] Activation: pay 0.1 GRAM to start mining and to get the free server
+- [x] Design system: follow user-pasted "Intelligent Performance" look (paper #ececeb, Inter, gradient glass cards 429x554, LED dot numbers, grain, CloudFront bg videos) + generated art
+- [x] Database (bg_* tables only; this backend is shared with other apps — never touch non-bg tables)
+- [x] Telegram identity (initData verification) + full-screen mini app setup
+- [x] Mining game home (match/drop, airdrop crates via ads, ad boosts)
+- [x] 90 servers page (1 free via 300 ads, 1 free via 50 referrals, rest paid in GRAM/TON)
+- [x] Missions page (many ad + referral tasks, daily ad ladder up to 1000)
+- [x] Squad / referrals (multi-level commissions, milestones)
+- [x] Operators (characters with boosts)
+- [x] Withdraw page (min 1, fee 0.05, join community, 1 referral OR 25 ads)
+- [x] TON Connect payments to treasury + verification + admin payment alerts
+- [x] Admin /101 (owners @eigiza @torker: stats, payments, withdrawals, tasks, task-managers who only see tasks)
+- [x] Bot: bold /start with colored buttons, gift messages with claim button
+- [x] Daily notifications (several per day to all users) + daily gifts
+- [x] Auto news posts 2–3/day (AI image + text + open-app button)
+- [x] BLOCKED: bot token (user will send), community channel username (user will send)
+- [x] Mined currency = user's own jetton (EQBmR1S2…dbG from STON.fi link), not GRAM; payments/fees stay in GRAM
+- [x] Ads via Monetag SDK (libtl.com, zone 12323205, show_12323205) instead of Adsgram
+- [x] Show live PUBG price; swap PUBG → GRAM inside the app
+- [x] GRAM withdrawals with minimum 0.5 GRAM (PUBG withdrawals stay too)
+- [x] Rename app to PUBG (same as the coin) everywhere: UI, titles, bot texts, manifest
+- [x] Redraw every image and icon (servers, operators, crate, logo, nav icons) in the exact glass-card site style
+- [x] Free base mining for everyone without a server (small rate)
+- [x] Better bottom navigation with clean transition animation between pages
+- [x] Move notifications (toasts) off the top and position them properly
+- [x] Daily referral contest; prize split among top 10 inviters
+- [x] Activation: pay 0.1 GRAM to start mining and to get the free server
