@@ -58,6 +58,8 @@
   --glass: oklch(1 0 0 / 0.42);
   --glass-strong: oklch(1 0 0 / 0.7);
   --glass-line: oklch(1 0 0 / 0.36);
+  --icon-lavender: oklch(0.78 0.085 305);
+  --icon-coral: oklch(0.7 0.145 30);
 
   --background: var(--paper);
   --foreground: var(--ink);
@@ -479,6 +481,8 @@
   transform: scale(0.86);
 }
 .dock .dock-icon {
+  width: 30px;
+  height: 30px;
   transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .dock a[data-status="active"] {
@@ -634,3 +638,15 @@
   border-color: var(--dot);
   box-shadow: 0 0 0 3px rgba(173, 49, 77, 0.14);
 }
+
+.glass-icon { display: inline-block; flex-shrink: 0; overflow: visible; vertical-align: middle; }
+.glass-icon__light { stop-color: var(--on-card); }
+.glass-icon__lavender { stop-color: var(--icon-lavender); }
+.glass-icon__coral { stop-color: var(--icon-coral); }
+.glass-icon__deep { stop-color: var(--dot); }
+.withdraw-flow { border-block: 1px solid var(--border); padding-block: 24px; }
+.withdraw-step { color: var(--copy); border-bottom: 2px solid var(--border); padding-block: 10px; font-size: 12px; }
+.withdraw-step[data-current="true"] { color: var(--dot); border-color: var(--dot); font-weight: 600; }
+.withdraw-review { display: grid; gap: 14px; margin-block: 20px; }
+.withdraw-review > div { display: flex; justify-content: space-between; gap: 18px; }
+.withdraw-review dd { text-align: right; max-width: 65%; overflow-wrap: anywhere; font-weight: 600; }

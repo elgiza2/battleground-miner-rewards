@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2 } from "@/components/game/GlassIcons";
 import { useCatalog, auth, errMsg, useRefresh } from "@/hooks/use-game";
 import { Masthead, StateGate } from "@/components/game/Masthead";
 import { GlassCard } from "@/components/game/GlassCard";
@@ -17,6 +17,8 @@ export const Route = createFileRoute("/operators")({
       { name: "description", content: "Recruit operators that boost your $PUBG mining speed." },
       { property: "og:title", content: "Operators — PUBG" },
       { property: "og:description", content: "From Rookie to Legend — each operator boosts every server you run." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Operators,

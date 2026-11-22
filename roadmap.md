@@ -1,5 +1,10 @@
 # DROPZONE roadmap
 
+- [ ] Redesign withdrawal as a reviewed step-by-step flow without changing economy rules
+- [ ] Replace all game icons with shared glass-style icons
+- [ ] Configure supplied bot, launch link and bold NewsEmoji-only messages
+- [ ] Connect supplied community channel @puilos and check bot membership
+
 - [x] Design system: follow user-pasted "Intelligent Performance" look (paper #ececeb, Inter, gradient glass cards 429x554, LED dot numbers, grain, CloudFront bg videos) + generated art
 - [x] Database (bg_* tables only; this backend is shared with other apps — never touch non-bg tables)
 - [x] Telegram identity (initData verification) + full-screen mini app setup

@@ -3,6 +3,7 @@ import { supabaseAdmin as db } from "@/integrations/supabase/client.server";
 import { RULES } from "./game-rules";
 import { getConfig, reconcilePendingPayments } from "./game.server";
 import { esc, kb, tg, tgSendPhotoBytes } from "./telegram.server";
+import { BOT_LAUNCH_URL } from "./bot-presentation";
 
 export const NOTIFY_HOURS = [7, 12, 17, 21];
 export const POST_HOURS = [9, 15, 20];
@@ -56,15 +57,10 @@ export async function enqueueBroadcast(text: string) {
   return key;
 }
 
-function buttons(origin: string | null, botUsername: string | null, extra?: { text: string; callback_data: string }) {
+function buttons(_origin: string | null, _botUsername: string | null, extra?: { text: string; callback_data: string }) {
   const rows: Parameters<typeof kb>[0] = [];
   if (extra) rows.push([{ ...extra, style: "success" }]);
-  const play = origin
-    ? { text: "▶  PLAY PUBG", web_app: { url: origin }, style: extra ? ("primary" as const) : ("success" as const) }
-    : botUsername
-      ? { text: "▶  PLAY PUBG", url: `https://t.me/${botUsername}?startapp=bot`, style: "success" as const }
-      : null;
-  if (play) rows.push([play]);
+  rows.push([{ text: "PLAY PUBG", url: BOT_LAUNCH_URL, style: extra ? "primary" : "success" }]);
   return kb(rows);
 }
 
@@ -147,7 +143,7 @@ async function generatePost(slot: string) {
     const b64 = (img as { data?: { b64_json?: string }[] }).data?.[0]?.b64_json;
     if (!b64) throw new Error("no image");
     const caption = `<b>${esc(headline)}</b>\n\n${esc(body)}`;
-    const markup = kb([[{ text: "▶  OPEN PUBG", url: cfg.botUsername ? `https://t.me/${cfg.botUsername}?startapp=news` : "https://t.me", style: "success" }]]);
+    const markup = kb([[{ text: "OPEN PUBG", url: BOT_LAUNCH_URL, style: "success" }]]);
     const r = await tgSendPhotoBytes(`@${cfg.community.replace(/^@/, "")}`, Buffer.from(b64, "base64"), caption, markup);
     await db.from("bg_posts").update({ status: r.ok ? "sent" : "failed", text: caption, message_id: r.result?.message_id ?? null, error: r.ok ? null : r.description ?? "send failed" }).eq("id", claim.id);
   } catch (e) {

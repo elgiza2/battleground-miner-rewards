@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Lock } from "lucide-react";
+import { Loader2, Lock } from "@/components/game/GlassIcons";
 import { useCatalog, useGameState, auth, errMsg, useRefresh } from "@/hooks/use-game";
 import { Masthead, StateGate } from "@/components/game/Masthead";
 import { GlassCard } from "@/components/game/GlassCard";
@@ -18,6 +18,8 @@ export const Route = createFileRoute("/servers")({
       { name: "description", content: "Pick from 90 battle-gear mining servers, from Field Radios to the Golden Airdrop." },
       { property: "og:title", content: "Armory — 90 mining servers | PUBG" },
       { property: "og:description", content: "Two free servers and 88 upgrades that mine $PUBG around the clock." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Armory,

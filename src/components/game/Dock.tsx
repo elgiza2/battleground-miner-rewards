@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Pickaxe, Server, Target, Users, Wallet } from "lucide-react";
+import { Pickaxe, Server, Target, Users, Wallet } from "@/components/game/GlassIcons";
 import { haptic } from "@/lib/telegram-client";
 
 const items = [

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Plus, Trash2 } from "@/components/game/GlassIcons";
 import { auth, errMsg, useReady } from "@/hooks/use-game";
 import { DotText } from "@/components/game/DotText";
 import { GlassCard } from "@/components/game/GlassCard";
@@ -30,6 +30,8 @@ export const Route = createFileRoute("/101")({
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Command center — PUBG" },
       { property: "og:description", content: "PUBG admin command center." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Admin,

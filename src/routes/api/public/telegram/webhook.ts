@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { BOT_LAUNCH_URL, newsEmoji, startCaption } from "@/lib/bot-presentation";
 
 type Update = {
   update_id: number;
@@ -46,7 +47,9 @@ async function handle(u: Update): Promise<unknown> {
     const q = u.callback_query;
     const m = /^g:([0-9a-f-]{36})$/.exec(q.data ?? "");
     if (!m) return T.tg("answerCallbackQuery", { callback_query_id: q.id });
-    const { data: gift } = await db.from("bg_gifts").select("*").eq("id", m[1]!).maybeSingle();
+    const giftId = m[1];
+    if (!giftId) return null;
+    const { data: gift } = await db.from("bg_gifts").select("*").eq("id", giftId).maybeSingle();
     if (!gift || new Date(gift.expires_at).getTime() < Date.now()) {
       return T.tg("answerCallbackQuery", { callback_query_id: q.id, text: "This gift has expired. Watch for the next drop!", show_alert: true });
     }
@@ -61,7 +64,7 @@ async function handle(u: Update): Promise<unknown> {
         message_id: q.message.message_id,
         reply_markup: T.kb([
           [{ text: `✅  CLAIMED +${Number(gift.amount)} PUBG`, callback_data: "noop" }],
-          ...(origin ? [[{ text: "▶  PLAY PUBG", web_app: { url: origin }, style: "success" as const }]] : []),
+           [{ text: "PLAY PUBG", url: BOT_LAUNCH_URL, style: "success" as const }],
         ]),
       });
     }
@@ -79,16 +82,10 @@ async function handle(u: Update): Promise<unknown> {
       ? `https://t.me/share/url?url=${encodeURIComponent(`https://t.me/${cfg.botUsername}?startapp=r${player.telegram_id}`)}&text=${encodeURIComponent("🪂 Drop into PUBG with me and mine $PUBG!")}`
       : null;
     const rows: Parameters<typeof T.kb>[0] = [];
-    if (origin) rows.push([{ text: "▶  PLAY PUBG", web_app: { url: origin }, style: "success" }]);
+    rows.push([{ text: "PLAY PUBG", url: BOT_LAUNCH_URL, style: "success" }]);
     if (share) rows.push([{ text: "🔥  INVITE & EARN 20%", url: share, style: "primary" }]);
     if (cfg.community) rows.push([{ text: "📢  JOIN COMMUNITY", url: `https://t.me/${cfg.community}`, style: "danger" }]);
-    const caption =
-      `<b>🪂 WELCOME TO PUBG, ${T.esc(msg.from.first_name ?? "SOLDIER").toUpperCase()}</b>\n\n` +
-      `<b>Drop in. Mine $PUBG. Swap to GRAM. Cash out.</b>\n\n` +
-      `<b>⛏  Deploy servers</b> — they mine 24/7\n` +
-      `<b>📦  Open airdrop crates</b> — instant loot\n` +
-      `<b>🔥  Build your squad</b> — earn 20% of their mining\n\n` +
-      `<b>Your first server is live. Tap PLAY.</b>`;
+    const caption = startCaption(msg.from.first_name ?? "Soldier");
     const banner = origin ? `${origin}${(await import("@/assets/art/start-banner.jpg.asset.json")).default.url}` : null;
     if (banner) {
       const r = await T.tg("sendPhoto", { chat_id: msg.chat.id, photo: banner, caption, parse_mode: "HTML", reply_markup: T.kb(rows) });
@@ -102,7 +99,7 @@ async function handle(u: Update): Promise<unknown> {
     if (role && origin) {
       await T.tg("sendMessage", {
         chat_id: msg.chat.id,
-        text: "<b>🛡 Command center</b>",
+        text: `<b>${newsEmoji("shield")} Command center</b>`,
         parse_mode: "HTML",
         reply_markup: T.kb([[{ text: "OPEN ADMIN PANEL", web_app: { url: `${origin}/101` }, style: "danger" }]]),
       });
@@ -112,9 +109,9 @@ async function handle(u: Update): Promise<unknown> {
   if (origin) {
     await T.tg("sendMessage", {
       chat_id: msg.chat.id,
-      text: "<b>Your servers are mining. Jump back in 👇</b>",
+      text: `<b>${newsEmoji("play")} Open PUBG and check your base.</b>`,
       parse_mode: "HTML",
-      reply_markup: T.kb([[{ text: "▶  PLAY PUBG", web_app: { url: origin }, style: "success" }]]),
+      reply_markup: T.kb([[{ text: "PLAY PUBG", url: BOT_LAUNCH_URL, style: "success" }]]),
     });
   }
   return null;

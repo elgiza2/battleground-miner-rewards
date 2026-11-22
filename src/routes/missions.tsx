@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Calendar, Check, Crown, ExternalLink, Flame, Link2, Loader2, Play, Star, Target, Trophy, Users } from "lucide-react";
+import { Calendar, Check, Crown, ExternalLink, Flame, Link2, Loader2, Play, Star, Target, Trophy, Users } from "@/components/game/GlassIcons";
 import { useMissions, useGameState, auth, errMsg, useRefresh } from "@/hooks/use-game";
 import { Masthead, StateGate } from "@/components/game/Masthead";
 import { GlassCard } from "@/components/game/GlassCard";
@@ -18,6 +18,8 @@ export const Route = createFileRoute("/missions")({
       { name: "description", content: "Daily video ladder, invite missions and check-in streaks that pay $PUBG." },
       { property: "og:title", content: "Missions — PUBG" },
       { property: "og:description", content: "Climb the 1000-video ladder and invite missions for $PUBG rewards." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Missions,
@@ -149,8 +151,8 @@ function Section({ title, items, action }: { title: string; items: Mission[]; ac
           const showBar = ["ads_daily", "ads_total", "referrals"].includes(t.kind);
           return (
             <div key={t.id} className="glass flex items-center gap-3 p-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[13px] bg-dot/10 text-dot">
-                <Icon className="h-5 w-5" />
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center text-dot">
+                <Icon className="h-10 w-10" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[14px] font-semibold">{t.title}</p>

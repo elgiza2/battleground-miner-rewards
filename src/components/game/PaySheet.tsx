@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Wallet, Coins } from "lucide-react";
+import { Loader2, Wallet, Coins } from "@/components/game/GlassIcons";
 import { Sheet } from "./Sheet";
 import { buyWithBalanceFn, createPaymentFn, verifyPaymentFn } from "@/lib/game.functions";
 import { payWithWallet } from "@/lib/ton-client";

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Check, Circle, ExternalLink, Loader2, Wallet as WalletIcon } from "lucide-react";
+import { Check, Circle, ExternalLink, Loader2, Wallet as WalletIcon } from "@/components/game/GlassIcons";
 import { useWallet, useGameState, auth, errMsg, useRefresh } from "@/hooks/use-game";
 import { Masthead, StateGate } from "@/components/game/Masthead";
 import { GlassCard } from "@/components/game/GlassCard";
@@ -9,7 +9,9 @@ import { DotText } from "@/components/game/DotText";
 import { waitForPayment } from "@/components/game/PaySheet";
 import { cancelWithdrawFn, checkCommunityFn, payWithdrawFeeFn, requestWithdrawFn, swapFn } from "@/lib/game.functions";
 import { connectWallet, payWithWallet, walletAddress } from "@/lib/ton-client";
-import { PUBG_ICON, PUBG_MARKET_URL, RULES, checkWithdraw, fmtGram, fmtPubg, quoteSwap, withdrawMin, type Currency } from "@/lib/game-rules";
+import { PUBG_MARKET_URL, RULES, checkWithdraw, fmtGram, fmtPubg, quoteSwap, withdrawMin, type Currency } from "@/lib/game-rules";
+import { art } from "@/lib/art";
+import { Button } from "@/components/ui/button";
 import { haptic, openTgLink } from "@/lib/telegram-client";
 
 export const Route = createFileRoute("/wallet")({
@@ -19,6 +21,8 @@ export const Route = createFileRoute("/wallet")({
       { name: "description", content: "Swap mined $PUBG to GRAM and withdraw to any TON wallet." },
       { property: "og:title", content: "Wallet & withdrawals — PUBG" },
       { property: "og:description", content: "Swap PUBG to GRAM and cash out from 0.5 GRAM." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: WalletPage,
@@ -35,6 +39,7 @@ function WalletPage() {
   const st = useGameState();
   const refresh = useRefresh();
   const d = w.data;
+  const [step, setStep] = useState<0 | 1 | 2>(0);
   const [amount, setAmount] = useState("");
   const [addr, setAddr] = useState("");
   const [joined, setJoined] = useState<boolean | null>(null);
@@ -93,6 +98,7 @@ function WalletPage() {
       const r = await requestWithdrawFn({ data: { ...auth(), amount: amt, wallet: addr, currency } });
       await refresh("wallet", "state");
       setAmount("");
+      setStep(0);
       setBusy(null);
       await payFee(r.payment);
     } catch (e) {
@@ -132,7 +138,7 @@ function WalletPage() {
                     <br />
                     <span className="text-on-card-soft">mined in the drop zone</span>
                   </p>
-                  <img src={PUBG_ICON} alt="PUBG" className="h-10 w-10 rounded-full border border-glass-line" />
+                  <img src={art("logo")} alt="PUBG" className="h-10 w-10 rounded-full border border-glass-line" />
                 </div>
                 <div className="mt-5 flex items-end gap-2" style={{ height: 40 }}>
                   <DotText text={d.balance.toFixed(2)} r={2.4} pitch={6} />
@@ -147,9 +153,9 @@ function WalletPage() {
                     <p className="text-[16px] font-semibold text-on-card tabular">{market?.pubgUsd ? `$${market.pubgUsd.toFixed(8)}` : "—"}</p>
                   </div>
                 </div>
-                <button className="pill pill--ghost pill--sm mt-4" onClick={() => openTgLink(PUBG_MARKET_URL)}>
+                <Button variant="ghost" className="pill pill--ghost pill--sm mt-4" onClick={() => openTgLink(PUBG_MARKET_URL)}>
                   PUBG chart on STON.fi <ExternalLink className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               </div>
             </GlassCard>
 
@@ -161,72 +167,82 @@ function WalletPage() {
                 </p>
                 <div className="mt-3 flex gap-2">
                   <input className="field tabular" inputMode="decimal" placeholder="PUBG amount" value={swapAmt} onChange={(e) => setSwapAmt(e.target.value.replace(",", "."))} />
-                  <button className="pill pill--sm !h-12" onClick={() => setSwapAmt(String(Math.floor(d.balance)))}>Max</button>
+                  <Button variant="ghost" className="pill pill--sm !h-12" onClick={() => setSwapAmt(String(Math.floor(d.balance)))}>Max</Button>
                 </div>
                 <p className="mt-2 text-[13px] text-on-card-soft tabular">You get ≈ {fmtGram(swapOut, 6)} GRAM</p>
-                <button className="pill mt-3 w-full" disabled={busy === "swap" || swapN < RULES.swapMinPubg || swapN > d.balance} onClick={doSwap}>
+                <Button variant="ghost" className="pill mt-3 w-full" disabled={busy === "swap" || swapN < RULES.swapMinPubg || swapN > d.balance} onClick={doSwap}>
                   {busy === "swap" && <Loader2 className="h-4 w-4 animate-spin" />} Swap to GRAM
-                </button>
+                </Button>
               </div>
             </GlassCard>
 
-            <section className="glass mt-[var(--gap)] p-4">
+            <section className="withdraw-flow mt-7" aria-label="Withdrawal">
               <div className="flex items-center justify-between">
-                <h2 className="text-[16px] font-semibold">Withdraw</h2>
-                <div className="flex gap-1.5">
-                  {(["GRAM", "PUBG"] as const).map((c) => (
-                    <button key={c} className="chip !h-7" data-on={currency === c} onClick={() => setCurrency(c)}>
-                      {c}
-                    </button>
-                  ))}
-                </div>
+                <h2 className="text-[21px] font-semibold">Withdraw</h2>
+                <WalletIcon className="h-9 w-9" />
               </div>
-              <div className="mt-3 space-y-2">
-                <Req ok={check?.amountOk ?? false} label={`Minimum ${fmtPubg(withdrawMin(currency), 2)} ${currency} · you have ${currency === "GRAM" ? fmtGram(d.gram, 6) : fmtPubg(d.balance)}`} />
-                <Req ok={joined ?? d.joinedCommunity} label="Join our community">
-                  {community && (
-                    <span className="flex gap-1.5">
-                      <button className="pill pill--ink pill--sm !h-7" onClick={() => openTgLink(`https://t.me/${community}`)}>
-                        Join
-                      </button>
-                      <button className="pill pill--sm !h-7" disabled={checking} onClick={verifyCommunity}>
-                        {checking ? <Loader2 className="h-3 w-3 animate-spin" /> : "Verify"}
-                      </button>
-                    </span>
-                  )}
-                </Req>
-                <Req ok={check?.activityOk ?? false} label={`Invite ${RULES.withdrawAltReferrals} friend or watch ${RULES.withdrawAltAds} videos (${Math.min(d.adsTotal, RULES.withdrawAltAds)}/${RULES.withdrawAltAds})`} />
-                <Req ok label={`Network fee ${RULES.withdrawFee} GRAM, paid from your wallet`} />
+              <div className="mb-5 grid grid-cols-3 gap-3" aria-label="Withdrawal steps">
+                {["1 · Amount", "2 · Destination", "3 · Review"].map((label, i) => (
+                  <span key={label} className="withdraw-step" data-current={step === i} aria-current={step === i ? "step" : undefined}>{label}</span>
+                ))}
               </div>
-              <div className="mt-4 space-y-2">
-                <div className="flex gap-2">
-                  <input className="field tabular" inputMode="decimal" placeholder={`${currency} amount (min ${withdrawMin(currency)})`} value={amount} onChange={(e) => setAmount(e.target.value.replace(",", "."))} />
-                  <button className="pill pill--sm !h-12" onClick={() => setAmount(String(Math.floor(bal * 10000) / 10000))}>
-                    Max
-                  </button>
+              {step === 0 && (
+                <div className="space-y-4">
+                  <div className="flex gap-2" role="group" aria-label="Withdrawal currency">
+                    {(["GRAM", "PUBG"] as const).map((c) => (
+                      <Button key={c} variant="ghost" className="chip" data-on={currency === c} aria-pressed={currency === c} onClick={() => { setCurrency(c); setAmount(""); }}>{c}</Button>
+                    ))}
+                  </div>
+                  <p className="text-[13px] text-copy">Available <b className="text-ink tabular">{currency === "GRAM" ? fmtGram(bal, 6) : fmtPubg(bal)} {currency}</b> · Minimum {withdrawMin(currency)}</p>
+                  <label className="block text-[13px] font-medium" htmlFor="withdraw-amount">Amount</label>
+                  <div className="flex gap-2">
+                    <input id="withdraw-amount" className="field tabular" inputMode="decimal" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value.replace(",", "."))} />
+                    <Button variant="ghost" className="pill pill--sm !h-12" onClick={() => setAmount(String(Math.floor(bal * 10000) / 10000))}>Max</Button>
+                  </div>
+                  {amount && !check?.amountOk && <p className="text-[12px] text-copy" role="status">Enter at least {withdrawMin(currency)} {currency}.</p>}
+                  {amt > bal && <p className="text-[12px] text-copy" role="status">Amount exceeds your available balance.</p>}
+                  <Button variant="ghost" className="pill pill--dot w-full" disabled={!check?.amountOk || !Number.isFinite(amt) || amt > bal || !!busy} onClick={() => setStep(1)}>Continue</Button>
                 </div>
-                <div className="flex gap-2">
-                  <input className="field" placeholder="TON wallet address" value={addr} onChange={(e) => setAddr(e.target.value)} />
-                  <button
-                    className="pill pill--sm !h-12"
-                    aria-label="Connect wallet"
-                    onClick={async () => {
-                      try {
-                        const a = await connectWallet();
-                        if (a) setAddr(a);
-                      } catch (e) {
-                        toast.error(errMsg(e));
-                      }
-                    }}
-                  >
-                    <WalletIcon className="h-4 w-4" />
-                  </button>
+              )}
+              {step === 1 && (
+                <div className="space-y-4">
+                  <label className="block text-[13px] font-medium" htmlFor="withdraw-address">Receiving TON wallet</label>
+                  <input id="withdraw-address" className="field" placeholder="UQ… or EQ…" value={addr} onChange={(e) => setAddr(e.target.value)} />
+                  <Button variant="ghost" className="pill w-full" onClick={async () => {
+                    try { const a = await connectWallet(); if (a) setAddr(a); }
+                    catch (e) { toast.error(errMsg(e)); }
+                  }}><WalletIcon className="h-5 w-5" /> Connect wallet</Button>
+                  <div className="space-y-3 border-y border-border py-4">
+                    <Req ok={joined ?? d.joinedCommunity} label="Community membership">
+                      {community && <span className="flex flex-wrap gap-1.5">
+                        <Button variant="ghost" className="pill pill--sm" onClick={() => openTgLink(`https://t.me/${community}`)}>Join</Button>
+                        <Button variant="ghost" className="pill pill--sm" disabled={checking} onClick={verifyCommunity}>{checking ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify"}</Button>
+                      </span>}
+                    </Req>
+                    <Req ok={check?.activityOk ?? false} label={`${RULES.withdrawAltReferrals} referral or ${RULES.withdrawAltAds} videos · ${Math.min(d.adsTotal, RULES.withdrawAltAds)}/${RULES.withdrawAltAds} videos`} />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" className="pill flex-1" onClick={() => setStep(0)}>Back</Button>
+                    <Button variant="ghost" className="pill pill--dot flex-1" disabled={!check?.ok || !addr.trim() || !!busy} onClick={() => setStep(2)}>Review</Button>
+                  </div>
                 </div>
-                <button className="pill pill--dot w-full" disabled={!check?.ok || !addr || !!busy} onClick={submit}>
-                  {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {busy === "fee" ? "Confirming fee…" : "Withdraw"}
-                </button>
-              </div>
+              )}
+              {step === 2 && (
+                <div>
+                  <dl className="withdraw-review text-[14px]">
+                    <div><dt className="text-copy">You receive</dt><dd className="tabular">{currency === "GRAM" ? fmtGram(amt, 6) : fmtPubg(amt)} {currency}</dd></div>
+                    <div><dt className="text-copy">To wallet</dt><dd className="font-mono text-[12px]">{addr}</dd></div>
+                    <div><dt className="text-copy">Separate fee</dt><dd>{RULES.withdrawFee} GRAM</dd></div>
+                  </dl>
+                  <p className="mb-5 text-[13px] leading-relaxed text-copy">The amount is reserved when you confirm. Pay the separate {RULES.withdrawFee} GRAM fee from your connected wallet to queue the payout. You can cancel an unpaid request below.</p>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" className="pill" disabled={!!busy} onClick={() => setStep(1)}>Back</Button>
+                    <Button variant="ghost" className="pill pill--dot flex-1" disabled={!check?.ok || !addr.trim() || !!busy} onClick={submit}>
+                      {busy && <Loader2 className="h-4 w-4 animate-spin" />}{busy === "fee" ? "Confirming fee…" : "Confirm & pay fee"}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </section>
 
             {d.withdrawals.length > 0 && (
@@ -241,7 +257,7 @@ function WalletPage() {
                       </div>
                       {x.status === "awaiting_fee" ? (
                         <span className="flex gap-1.5">
-                          <button
+                          <Button variant="ghost"
                             className="pill pill--dot pill--sm"
                             disabled={!!busy}
                             onClick={async () => {
@@ -254,13 +270,13 @@ function WalletPage() {
                             }}
                           >
                             Pay fee
-                          </button>
-                          <button
+                          </Button>
+                          <Button variant="ghost"
                             className="pill pill--sm"
                             onClick={async () => {
                               try {
                                 await cancelWithdrawFn({ data: { ...auth(), id: x.id } });
-                                toast.success("Cancelled — GRAM returned");
+                                toast.success("Cancelled — balance returned");
                                 await refresh("wallet", "state");
                               } catch (e) {
                                 toast.error(errMsg(e));
@@ -268,7 +284,7 @@ function WalletPage() {
                             }}
                           >
                             Cancel
-                          </button>
+                          </Button>
                         </span>
                       ) : (
                         <span className="chip !h-7" data-on={x.status === "paid"}>

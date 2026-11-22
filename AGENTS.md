@@ -28,3 +28,7 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+- Game controls use the shared GlassIcons module so all glyphs share the site's sculpted glass finish.
+- Telegram message presentation is normalized centrally with a verified custom-emoji allowlist to keep every bot message consistent.
+- Withdrawal review is client-side only; request and fee settlement continue through existing server functions to preserve financial rules.

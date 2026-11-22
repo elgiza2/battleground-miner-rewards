@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Copy, Crown, Send } from "lucide-react";
+import { Copy, Crown, Send } from "@/components/game/GlassIcons";
 import { useSquad, useGameState } from "@/hooks/use-game";
 import { Masthead, StateGate } from "@/components/game/Masthead";
 import { GlassCard } from "@/components/game/GlassCard";
@@ -16,6 +16,8 @@ export const Route = createFileRoute("/squad")({
       { name: "description", content: "Invite friends to PUBG and earn 20% of their mining plus 10% of their purchases." },
       { property: "og:title", content: "Squad — invite & earn | PUBG" },
       { property: "og:description", content: "Earn 20% of everything your squad mines, forever." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Squad,

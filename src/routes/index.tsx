@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ChevronRight, Loader2, Play, Zap } from "lucide-react";
+import { ChevronRight, Loader2, Play, Zap } from "@/components/game/GlassIcons";
 import { useGameState, auth, errMsg, useRefresh } from "@/hooks/use-game";
 import { Masthead, StateGate } from "@/components/game/Masthead";
 import { GlassCard } from "@/components/game/GlassCard";
@@ -11,7 +11,7 @@ import { PaySheet, type PayItem } from "@/components/game/PaySheet";
 import { useAdAction } from "@/components/game/useAdAction";
 import { claimMiningFn } from "@/lib/game.functions";
 import { art } from "@/lib/art";
-import { PUBG_ICON, RULES, fmtGram, fmtPubg } from "@/lib/game-rules";
+import { RULES, fmtGram, fmtPubg } from "@/lib/game-rules";
 import { haptic } from "@/lib/telegram-client";
 
 export const Route = createFileRoute("/")({
@@ -21,6 +21,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Your PUBG base: live $PUBG mining, airdrop crates and boosts." },
       { property: "og:title", content: "PUBG — Base" },
       { property: "og:description", content: "Live $PUBG mining, airdrop crates and boosts on Telegram." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Base,
@@ -84,7 +86,7 @@ function Base() {
           s && (
             <Link to="/wallet" className="glass flex shrink-0 flex-col items-end px-3 py-2">
               <span className="flex items-center gap-1 text-[15px] font-semibold tabular text-ink">
-                <img src={PUBG_ICON} alt="" className="h-4 w-4 rounded-full" />
+                <img src={art("logo")} alt="" className="h-4 w-4 rounded-full" />
                 {fmtPubg(s.me.balance, 0)}
               </span>
               <span className="mt-0.5 text-[10.5px] text-copy tabular">{fmtGram(s.me.gram)} GRAM</span>
@@ -95,7 +97,7 @@ function Base() {
       <StateGate isLoading={q.isLoading} error={q.error}>
         {s && (
           <Link to="/wallet" className="glass mb-[var(--gap)] flex items-center gap-3 px-4 py-3">
-            <img src={PUBG_ICON} alt="PUBG" className="h-8 w-8 rounded-full" />
+            <img src={art("logo")} alt="PUBG" className="h-8 w-8 rounded-full" />
             <div className="flex-1">
               <p className="text-[13px] font-semibold">PUBG price</p>
               <p className="text-[11.5px] text-copy tabular">1 GRAM = {fmtPubg(s.market.pubgPerGram, 0)} PUBG</p>

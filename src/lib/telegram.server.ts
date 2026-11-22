@@ -1,4 +1,5 @@
 import { createHash, createHmac, timingSafeEqual } from "crypto";
+import { boldBotHtml, NEWS_EMOJI, stripEmoji } from "./bot-presentation";
 
 export type TgUser = {
   id: number;
@@ -56,10 +57,18 @@ export type TgResult<T = unknown> = { ok: boolean; result?: T; description?: str
 export async function tg<T = unknown>(method: string, body: Record<string, unknown>): Promise<TgResult<T>> {
   const token = botToken();
   if (!token) return { ok: false, description: "bot token missing" };
+  const formatted = { ...body };
+  if (body["parse_mode"] === "HTML") {
+    for (const key of ["text", "caption"]) {
+      if (typeof body[key] === "string") formatted[key] = boldBotHtml(body[key]);
+    }
+  } else if (typeof body["text"] === "string") {
+    formatted["text"] = stripEmoji(body["text"]);
+  }
   const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify(formatted),
   });
   const json = (await res.json().catch(() => ({ ok: false, description: `HTTP ${res.status}` }))) as TgResult<T>;
   if (!json.ok) console.error(`[telegram] ${method} failed`, json.error_code, json.description);
@@ -76,7 +85,7 @@ export async function tgSendPhotoBytes(
   if (!token) return { ok: false, description: "bot token missing" };
   const form = new FormData();
   form.append("chat_id", String(chatId));
-  form.append("caption", caption);
+  form.append("caption", boldBotHtml(caption));
   form.append("parse_mode", "HTML");
   form.append("reply_markup", JSON.stringify(replyMarkup));
   form.append("photo", new Blob([new Uint8Array(bytes)], { type: "image/jpeg" }), "drop.jpg");
@@ -88,9 +97,13 @@ export function esc(s: string) {
   return s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
-type Btn = { text: string; style?: "primary" | "success" | "danger" } & (
+type Btn = { text: string; style?: "primary" | "success" | "danger"; icon_custom_emoji_id?: string } & (
   | { url: string }
   | { callback_data: string }
   | { web_app: { url: string } }
 );
-export const kb = (rows: Btn[][]) => ({ inline_keyboard: rows });
+export const kb = (rows: Btn[][]) => ({ inline_keyboard: rows.map((row) => row.map((button) => {
+  const { icon_custom_emoji_id, ...rest } = button;
+  const allowed = Object.values(NEWS_EMOJI).some((e) => e.id === icon_custom_emoji_id);
+  return { ...rest, text: stripEmoji(button.text).trim(), ...(allowed ? { icon_custom_emoji_id } : {}) };
+})) });
