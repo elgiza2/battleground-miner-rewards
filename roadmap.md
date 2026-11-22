@@ -1,5 +1,11 @@
 # DROPZONE roadmap
 
+- [x] Prepare five bold English community posts without emoji and matching images in .lovable/community-posts.md
+- [ ] Publish only the first to @puilos at 12:40 UTC with the Dropeybot launch button: blocked by unconfirmed bot posting permission and no configured external scheduler; nothing scheduled
+
+- [x] Create new PUBG /start welcome image matching the app's glass design and connect it to the bot
+- [x] Confirm all player-facing bot launch buttons use https://t.me/Dropeybot?startapp (keep referral attribution links intact)
+
 - [x] Redesign withdrawal as a reviewed step-by-step flow without changing economy rules
 - [x] Replace all game icons with shared glass-style icons
 - [x] Configure supplied bot, launch link and bold NewsEmoji-only messages; webhook registered and received Telegram request
